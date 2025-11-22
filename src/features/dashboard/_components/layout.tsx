@@ -11,14 +11,15 @@ const DashbaordLayout = ({ children }: { children: React.ReactNode }) => {
       defaultOpen={true}
       style={
         {
-          "--sidebar-width": "18.13rem",
+          "--sidebar-width": "18rem",
           "--sidebar-width-icon": "4.5rem",
         } as React.CSSProperties
       }
+      className=" flex flex-row items-center"
     >
       <AppSidebar />
 
-      <main className="">{children}</main>
+      <main className=" w-full ">{children}</main>
     </SidebarProvider>
   );
 };
