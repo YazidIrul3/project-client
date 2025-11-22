@@ -24,8 +24,8 @@ export const queryClient = new QueryClient({
       refetchOnReconnect: true,
     },
     mutations: {
-      onError: () => {
-        alert("Sebuah kesalahan terjadi");
+      onError: (err) => {
+        console.log(err.message);
       },
     },
   },

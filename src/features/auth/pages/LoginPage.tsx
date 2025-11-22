@@ -1,3 +1,5 @@
+"use client";
+import withAuthUser from "@/utils/withAuthUser";
 import { LoginForm } from "../_components/LoginForm";
 
 const LoginPage = () => {
@@ -8,4 +10,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default withAuthUser(LoginPage);

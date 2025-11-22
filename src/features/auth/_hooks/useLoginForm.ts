@@ -1,22 +1,15 @@
 import { authClient } from "@/lib/auth-client";
-import { axiosInstance } from "@/lib/axios";
-import { AxiosResponse } from "axios";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-
-type AxiosResponseType = {
-  url: string;
-};
 
 export const useLoginForm = () => {
   const onSubmit = async () => {
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "http://localhost:3000/",
+        callbackURL: "http://localhost:3000/profile",
 
         fetchOptions: {
-          onSuccess: () => {
+          onSuccess: async () => {
             toast.success("Login successful!");
           },
           onError: (err) => {
