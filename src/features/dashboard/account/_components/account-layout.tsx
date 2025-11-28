@@ -1,11 +1,4 @@
 import { DropdownMenuGroup } from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { SidebarMenu, SidebarMenuButton } from "@/components/ui/sidebar";
 import DashbaordLayout from "@/features/dashboard/_components/layout";
 import {
@@ -14,12 +7,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
-import { SelectContent } from "@radix-ui/react-select";
 import { ChevronUp } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
+const AccountLayout = ({ children }: { children: React.ReactNode }) => {
   const path = usePathname();
 
   return (
@@ -31,25 +23,27 @@ const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
           <div className=" md:flex hidden w-full  flex-col gap-3 min-w-full">
             <Link
               className={`${
-                path == "/profile" ? "bg-slate-200  rounded-full " : ""
+                path == "/account/profile" ? "bg-slate-200  rounded-full " : ""
               } font-semibold text-sm w-full min-w-full px-3 py-1.5`}
-              href={"/account"}
+              href={"/account/profile"}
             >
               Profile
             </Link>
             <Link
               className={`${
-                path == "/billing" ? "bg-slate-200  rounded-full " : ""
+                path == "/account/billing" ? "bg-slate-200  rounded-full " : ""
               } font-semibold text-sm w-full min-w-full px-3 py-1.5`}
-              href={"/billing"}
+              href={"/account/billing"}
             >
               Billing
             </Link>
             <Link
               className={`${
-                path == "/workspace" ? "bg-slate-200  rounded-full " : ""
+                path == "/account/workspace"
+                  ? "bg-slate-200  rounded-full "
+                  : ""
               } font-semibold text-sm w-full min-w-full px-3 py-1.5`}
-              href={"/workspace"}
+              href={"/account/workspace"}
             >
               Workspace
             </Link>
@@ -97,10 +91,10 @@ const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
           </SidebarMenu>
         </aside>
 
-        <div className=" w-full md:w-10/12 p-6  mx-auto">{children}</div>
+        <div className=" w-full md:w-10/12 p-6  mx-auto ">{children}</div>
       </section>
     </DashbaordLayout>
   );
 };
 
-export default ProfileLayout;
+export default AccountLayout;

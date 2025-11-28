@@ -22,10 +22,10 @@ export const createWorkspace = async (
   token?: string
 ) => {
   try {
-    const response = await axiosInstance.post("/workspace/", body,{
+    const response = await axiosInstance.post("/workspace/", body, {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     return response.data;
@@ -51,7 +51,7 @@ export const useCreateWorkspace = (params: useCreateWorkspaceParams) => {
 
     onSuccess: (data, Variables, onMutateResult, context) => {
       queryClient.invalidateQueries({ queryKey: getWorkpacesQuery() });
-      setCurrentWorkspace({ userId: Variables.userId, name: Variables.name });
+      // setCurrentWorkspace({ userId: Variables.userId, name: Variables.name });
 
       params.mutationConfig?.onSuccess?.(
         data,

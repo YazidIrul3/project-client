@@ -1,4 +1,4 @@
-import { User } from "@/types/api";
+import { User } from "@/types/api/api";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 

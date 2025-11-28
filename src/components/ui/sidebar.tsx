@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { PanelLeftIcon } from "lucide-react";
+import { MenuIcon } from "lucide-react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -24,6 +25,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { AppSidebar } from "@/features/dashboard/_components/app-sidebar";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -273,12 +275,15 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <div className=" flex flex-col gap-4">
-        <div className=" bg-red-600 text-slate-50 font-bold text-lg rounded-full p-3">
-          Y
-        </div>
-        {/* <PanelLeftIcon /> */}
-      </div>
+      {/* <PanelLeftIcon /> */}
+      <Sheet>
+        <SheetTrigger asChild>
+          <MenuIcon />
+        </SheetTrigger>
+        <SheetContent>
+          <AppSidebar />
+        </SheetContent>
+      </Sheet>
     </Button>
   );
 }
