@@ -2,7 +2,6 @@ import { axiosInstance } from "@/lib/axios";
 import { MutationConfig } from "@/lib/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import z, { string } from "zod";
-import { User } from "better-auth";
 
 const updateUserInputSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -12,28 +11,30 @@ const updateUserInputSchema = z.object({
 
 export type UpdateUserInput = z.infer<typeof updateUserInputSchema>;
 
-export const updateUser = async ({
-  id,
-  data,
-}: {
-  id: string;
-  data: UpdateUserInput;
-}): Promise<User> => {
-  const res = await axiosInstance.put(`/auth/${id}`, data);
+export const updateUser = async (
+  data: UpdateUserInput,
+  id: string,
+  token: string
+) => {
+  const res = await axiosInstance.put(`/auth/${id}`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   return res.data;
 };
 
 type UseUpdateUserOptions = {
+  token: string;
+  id: string;
   mutationConfig?: MutationConfig<typeof updateUser>;
 };
 
-export const useUpdateUser = ({
-  mutationConfig,
-}: UseUpdateUserOptions = {}) => {
+export const useUpdateUser = (params: UseUpdateUserOptions) => {
   const queryClient = useQueryClient();
 
-  const { onSuccess, ...restConfig } = mutationConfig || {};
+  const { onSuccess, ...restConfig } = params.mutationConfig || {};
 
   return useMutation({
     onSuccess: (data, ...args) => {
@@ -43,6 +44,9 @@ export const useUpdateUser = ({
       onSuccess?.(data, ...args);
     },
     ...restConfig,
-    mutationFn: updateUser,
+    mutationFn: (body: UpdateUserInput) => {
+      if (!params.token) return Promise.resolve(null);
+      return updateUser(body, params.id, params.token);
+    },
   });
 };

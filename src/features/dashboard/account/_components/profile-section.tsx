@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useGetProfile } from "../../../api/user/get-profile";
-import ProfileLayout from "../_components/profile-layout";
+import AccountLayout from "../_components/account-layout";
 import {
   Form,
   FormControl,
@@ -32,14 +32,13 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import withAuthUser from "@/utils/withAuthUser";
 import { authClient } from "@/lib/auth-client";
 
-const ProfilePage = () => {
+export const ProfileSection = () => {
   const [nameInputValue, setNameInputValue] = useState<string>("");
   const { data: profile, isLoading: fetchProfileLoading } = useGetProfile(
     authClient.useSession().data?.session.token
@@ -51,6 +50,8 @@ const ProfilePage = () => {
           toast.success("update user success");
         },
       },
+      token: authClient.useSession().data?.session.token!,
+      id: authClient.useSession().data?.user?.id!,
     });
   const form = useForm<UpdateUserSchema>({
     resolver: zodResolver(updateUserSchema),
@@ -66,12 +67,9 @@ const ProfilePage = () => {
 
   const handleUpdateUser = () => {
     updateUserMutation({
-      data: {
-        name: nameInputValue,
-        number_phone: nameInputValue,
-        timezone: nameInputValue,
-      },
-      id: fetchProfileLoading ? "" : profile.data.id,
+      name: nameInputValue,
+      number_phone: nameInputValue,
+      timezone: nameInputValue,
     });
   };
 
@@ -88,20 +86,20 @@ const ProfilePage = () => {
   }, [profile, form]);
 
   return (
-    <div>
+    <section>
       {fetchProfileLoading ? (
         <Spinner className=" " />
       ) : (
-        <ProfileLayout>
+        <AccountLayout>
           <div className=" flex flex-col gap-4  ">
             <Form {...form}>
               <Card className=" ">
                 <CardHeader>
-                  <CardTitle>Overview</CardTitle>
+                  <CardTitle className=" font-bold">Overview</CardTitle>
                 </CardHeader>
 
                 <CardContent className="flex flex-col gap-3">
-                  <h4>Avatar</h4>
+                  <h4 className=" font-semibold">Avatar</h4>
                   <div className=" bg-red-600 text-slate-50 font-bold w-fit text-2xl px-5 py-3 flex justify-center items-center rounded-xl">
                     {profile?.data.name[0]}
                   </div>
@@ -183,10 +181,8 @@ const ProfilePage = () => {
               </Card>
             </Form>
           </div>
-        </ProfileLayout>
+        </AccountLayout>
       )}
-    </div>
+    </section>
   );
 };
-
-export default withAuthUser(ProfilePage);

@@ -19,7 +19,13 @@ const DashbaordLayout = ({ children }: { children: React.ReactNode }) => {
     >
       <AppSidebar />
 
-      <main className=" w-full ">{children}</main>
+      <main className=" w-full ">
+        <div className=" md:hidden flex flex-col gap-4 px-2">
+          <SidebarTrigger />
+        </div>
+
+        {children}
+      </main>
     </SidebarProvider>
   );
 };

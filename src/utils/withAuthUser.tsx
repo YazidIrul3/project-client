@@ -1,13 +1,19 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useCreateWorkspace } from "@/features/api/workspace/create-workspace";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ComponentType, useEffect } from "react";
 
+type WithAuthOptions = {
+  redirectUrl?: string;
+};
+
 const withAuthUser = (OriginalComponent: ComponentType) => {
-  return () => {
+  return (props: WithAuthOptions = {}) => {
+    const { redirectUrl, ...restProps } = props;
     const { data, isRefetching, isPending } = authClient.useSession();
     const router = useRouter();
+    const path = usePathname();
     const {
       mutate: createWorkspaceMutation,
       isPending: createWorkspaceLoading,
@@ -26,17 +32,17 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
           workspaceTypeName: "personal",
         });
 
-        router.push("/profile");
+        router.push(redirectUrl || "/account/profile");
       } else {
-        router.push("/login");
+        if (path != "/login") router.push("/login");
       }
-    }, [data]);
+    }, [data?.session.token]);
 
-    if (isPending || isPending == null || isRefetching) {
+    if (isPending || createWorkspaceLoading || isRefetching) {
       return <Spinner />;
     }
 
-    return <OriginalComponent />;
+    return <OriginalComponent {...restProps} />;
   };
 };
 

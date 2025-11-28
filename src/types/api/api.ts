@@ -34,12 +34,6 @@ export type Team = Entity<{
   description: string;
 }>;
 
-export type Workspace = Entity<{
-  name: string;
-  workstypeId: string;
-  avatar: string;
-  timezone: User;
-}>;
 export type Discussion = Entity<{
   title: string;
   body: string;
