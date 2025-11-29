@@ -43,9 +43,12 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import SheetSideBackground from "./sheet-side-background";
+import { useRouter } from "next/navigation";
+import { useSheet } from "@/hooks/use-sheet";
 
 const CreateWorkspaceSheet = () => {
   const { data } = authClient.useSession();
+  const router = useRouter();
   const token = data?.session.token;
   const form = useForm<CreateWorkspaceSchema>({
     resolver: zodResolver(createWorkspaceSchema),
@@ -56,6 +59,7 @@ const CreateWorkspaceSheet = () => {
     mutationConfig: {
       onSuccess: () => {
         toast.success("Workspace created successfully");
+        closeSheet();
       },
     },
   });
@@ -67,6 +71,7 @@ const CreateWorkspaceSheet = () => {
     workspaceTypeName: "team",
   });
   const { control } = form;
+  const { open, openSheet, setOpen, closeSheet } = useSheet();
 
   const handleOnChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -99,13 +104,14 @@ const CreateWorkspaceSheet = () => {
   };
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         asChild
         className=" min-w-full justify-start flex font-normal text-sm px-2 py-2"
       >
         <Button
           variant={"ghost"}
+          onClick={openSheet}
           className=" justify-start flex font-normal text-sm px-2"
         >
           <Plus size={20} />
@@ -133,6 +139,7 @@ const CreateWorkspaceSheet = () => {
                     <FormLabel className=" mb-2">Name</FormLabel>
                     <FormControl>
                       <Input
+                        placeholder="Type workspace name"
                         name="name"
                         onChange={(e) => {
                           field.onChange(e);
