@@ -13,11 +13,9 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
     const { redirectUrl, ...restProps } = props;
     const { data, isRefetching, isPending } = authClient.useSession();
     const router = useRouter();
-    const path = usePathname();
     const {
       mutate: createWorkspaceMutation,
       isPending: createWorkspaceLoading,
-      isSuccess: createWorkspaceIsSuccess,
     } = useCreateWorkspace({
       token: data?.session.token,
     });
@@ -32,11 +30,11 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
           workspaceTypeName: "personal",
         });
 
-        router.push(redirectUrl || "/account/profile");
+        router.push(redirectUrl || "");
       } else {
-        if (path != "/login") router.push("/login");
+        router.push("/login");
       }
-    }, [data?.session.token]);
+    }, [isPending && isRefetching && data?.session.token]);
 
     if (isPending || createWorkspaceLoading || isRefetching) {
       return <Spinner />;

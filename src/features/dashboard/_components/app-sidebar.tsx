@@ -42,17 +42,23 @@ import { useGetWorkspacesByUser } from "@/features/api/workspace/get-user-worksp
 import CreateWorkspaceSheet from "./sheets/create-workspace-sheet";
 import { WorkspaceEntity } from "@/types/api/workspace";
 import CreateProjectSheet from "./sheets/create-project-sheet";
+import { useRouter } from "next/navigation";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { onClick } = useLogout();
   const { workspace, setCurrentWorkspace } = useCurrentWorkspace();
   const { data: session } = authClient.useSession();
   const { open } = useSidebar();
+  const router = useRouter();
   const { data: workspaceSidebarData, isLoading: workspaceSidebarDataLoading } =
     useGetWorkspaceSidebar({
-      token: session?.session.token!,
+      token: session?.session.token as string,
       userId: workspace.userId,
       workspaceName: workspace.name,
+      queryConfig: {
+        enabled:
+          !!session?.session.token && !!workspace.userId && !!workspace.name,
+      },
     });
   const { data: workspaceByUser, isLoading: workspaceByUserLoading } =
     useGetWorkspacesByUser({
@@ -62,9 +68,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <div>
-      {workspaceSidebarDataLoading || workspaceByUserLoading ? (
-        <Spinner />
-      ) : (
+      {workspaceSidebarDataLoading || workspaceByUserLoading ? null : ( // <Spinner />
         <Sidebar
           collapsible="icon"
           {...props}
@@ -98,8 +102,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <ChevronUp className="ml-auto" />
                       </div>
                     ) : (
-                      // <div className=" bg-red-600  text-slate-50 font-bold text-lg w-[100px] h-[100px] flex justify-center items-center rounded-full">
-                      // </div>
                       <div className="  bg-red-600 text-slate-50 font-bold text-lg p-3 flex justify-center items-center rounded-full">
                         {workspaceSidebarData?.user?.name[0]}
                       </div>
@@ -119,31 +121,36 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       {workspaceByUser?.map(
                         (item: WorkspaceEntity, i: number) => {
                           return (
-                            <Link
-                              href={"/account/workspace"}
+                            <Button
                               onClick={() => {
                                 setCurrentWorkspace({
                                   name: item?.name,
-                                  userId: item?.user?.id!,
+                                  userId: item?.user?.id as string,
                                 });
+
+                                // router.refresh();
+                                window.location.reload();
                               }}
+                              variant={"ghost"}
                               key={i}
                               className={`${
                                 item.name == workspace.name
                                   ? "bg-slate-100"
                                   : "hover:bg-slate-100"
-                              } flex flex-row items-center gap-2  py-2 `}
+                              } flex flex-row gap-2  py-2 `}
                             >
-                              <div className=" uppercase  bg-red-600 text-slate-50 text-xs font-bold  px-2 py-1  flex justify-center items-center rounded-md">
-                                {item?.name[0]}
+                              <div className="flex flex-row gap-2 items-center">
+                                <div className=" uppercase  bg-red-600 text-slate-50 text-xs font-bold  px-2 py-1  flex justify-center items-center rounded-md">
+                                  {item?.name[0]}
+                                </div>
+
+                                <h1 className=" font-semibold text-start text-sm w-[200px] truncate">
+                                  {item?.name}
+                                </h1>
                               </div>
 
-                              <span className=" font-semibold text-sm w-[200px] truncate">
-                                {item?.name}
-                              </span>
-
                               <SettingsIcon size={18} color="#C4C4C4" />
-                            </Link>
+                            </Button>
                           );
                         }
                       )}
@@ -152,23 +159,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                   <div className=" h-1 bg-slate-100 mb-1.5"></div>
 
-                  <Button
-                    variant={"ghost"}
-                    className=" min-w-full justify-start flex font-normal text-sm px-2"
+                  <Link
+                    href={"/account/workspace"}
+                    className=" min-w-full justify-start flex font-normal text-sm px-2 items-center gap-3"
                   >
                     <SettingsIcon size={20} />
                     Workspace Setting
-                  </Button>
+                  </Link>
 
                   <div className=" h-1 bg-slate-100 my-1.5"></div>
-
-                  {/* <Button
-                  variant={"ghost"}
-                  className=" min-w-full justify-start flex font-normal text-sm px-2"
-                >
-                  <Plus size={20} />
-                  New Workspace
-                </Button> */}
 
                   <CreateWorkspaceSheet />
                 </DropdownMenuContent>
@@ -239,8 +238,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarGroup>
 
             <SidebarGroup className=" flex flex-col gap-3 mt-4">
-              <div>
-                <h3 className=" text-sm font-semibold">Project</h3>
+              <div className={`${open ? "flex" : "hidden"} `}>
+                <h3 className={` text-sm font-semibold`}>Project</h3>
               </div>
 
               {workspaceSidebarData?.projects?.length > 0
@@ -300,7 +299,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     className="w-[--radix-popper-anchor-width]"
                   >
                     <DropdownMenuItem>
-                      <span>Account</span>
+                      <Link href={"/account/profile"}>Account</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
                       <span>Billing</span>

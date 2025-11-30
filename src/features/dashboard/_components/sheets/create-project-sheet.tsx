@@ -8,7 +8,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { SelectGroup } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -34,22 +41,21 @@ const CreateProjectSheet = () => {
         asChild
         className=" min-w-full justify-start flex font-normal text-sm px-2 py-2"
       >
-        <Button className={` text-xs`} variant={"secondary"}>
+        <Button className={` text-xs mx-auto w-fit`} variant={"secondary"}>
           <Plus />
           <h1 className={`${open ? "" : "hidden"}`}> Add Project</h1>
-          {/* <h1 className={``}> Add Project</h1> */}
         </Button>
       </SheetTrigger>
 
-      <SheetContent className=" flex flex-row justify-between  min-w-11/12 mx-auto h-11/12 translate-x-[-50%] translate-y-[-50%] left-1/2 top-1/2 rounded-xl ">
+      <SheetContent className=" flex flex-row justify-between  min-w-9/12 mx-auto h-fit translate-x-[-50%] translate-y-[-50%] left-1/2 top-1/2 rounded-xl ">
         <Form {...form}>
           <div className=" flex flex-col w-full ">
             <SheetHeader className=" mb-3">
               <SheetTitle className=" text-xl font-bold">
-                Create New Workspace
+                Create New Project
               </SheetTitle>
               <SheetDescription>
-                Workspace will help you to manage a lot of your projects
+                Project will help you for making flow of your project
               </SheetDescription>
             </SheetHeader>
 
@@ -59,9 +65,10 @@ const CreateProjectSheet = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className=" mb-2">Name</FormLabel>
+                    <FormLabel className=" mb-2">Project Name</FormLabel>
                     <FormControl>
                       <Input
+                        placeholder="Type Project name"
                         name="name"
                         onChange={(e) => {
                           field.onChange(e);
@@ -69,6 +76,31 @@ const CreateProjectSheet = () => {
                         }}
                       />
                     </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="timezone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Template Project</FormLabel>
+                    <FormControl className=" lg:w-9/12 w-full">
+                      <Select defaultValue="default">
+                        <SelectTrigger value={"tes"}>
+                          <SelectValue placeholder="Select a timezone" />
+                        </SelectTrigger>
+
+                        <SelectContent className=" capitalize">
+                          <SelectGroup>
+                            <SelectItem value="default">default</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+
+                    <FormMessage />
                   </FormItem>
                 )}
               />

@@ -38,6 +38,8 @@ import { WorkspaceupdateEntity } from "@/types/api/workspace";
 import { useUpdatWorkspace } from "@/features/api/workspace/update-workspace";
 import { useDeleteWorkspace } from "@/features/api/workspace/delete-workspace";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import DeleteWorkspaceSheet from "../../_components/sheets/delete-workspace-sheet";
 
 export const WorkspaceOverview = () => {
   const form = useForm();
@@ -46,9 +48,15 @@ export const WorkspaceOverview = () => {
   const { data: session } = authClient.useSession();
   const { data: workspace, isLoading: workspaceSidebarDataLoading } =
     useGetWorkspaceSidebar({
-      token: session?.session.token!,
-      userId: currentWorkspace.userId,
-      workspaceName: currentWorkspace.name,
+      token: session?.session.token as string,
+      userId: currentWorkspace.userId as string,
+      workspaceName: currentWorkspace.name as string,
+      queryConfig: {
+        enabled:
+          !!session?.session.token &&
+          !!currentWorkspace.userId &&
+          !!currentWorkspace.name,
+      },
     });
   const [bodyRequest, setBodyRequest] = useState<WorkspaceupdateEntity>({
     name: workspace?.name,
@@ -77,6 +85,7 @@ export const WorkspaceOverview = () => {
     updateWorkspaceMutation({ name: workspace?.name, timezone: "" });
     setBodyRequest({ name: workspace?.name, avatar: "", timezone: "" });
   };
+
   return (
     <Form {...form}>
       <Card className=" ">
@@ -165,22 +174,6 @@ export const WorkspaceDeleteView = () => {
       userId: currentWorkspace.userId,
       workspaceName: currentWorkspace.name,
     });
-  const { mutate: deleteWorkspaceMutation } = useDeleteWorkspace({
-    token: session?.session.token!,
-    id: workspace?.id,
-    mutationConfig: {
-      onSuccess: () => {
-        toast.success("Delete workspace success");
-      },
-    },
-  });
-
-  const handleOnDelete = () => {
-    deleteWorkspaceMutation({
-      token: session?.session.token!,
-      id: workspace?.id,
-    });
-  };
 
   return (
     <Card className=" bg-red-50 shadow-red-600 shadow-xs pb-4">
@@ -203,15 +196,7 @@ export const WorkspaceDeleteView = () => {
       )}
 
       <CardFooter>
-        {workspace?.workspaceType?.name == "personal" ? (
-          <Button className=" bg-red-600" disabled>
-            Delete
-          </Button>
-        ) : (
-          <Button className=" bg-red-600" onClick={handleOnDelete}>
-            Delete
-          </Button>
-        )}
+        <DeleteWorkspaceSheet />
       </CardFooter>
     </Card>
   );
@@ -222,9 +207,12 @@ export const WorkspaceSection = () => {
   const { data: session } = authClient.useSession();
   const { data: workspace, isLoading: workspaceSidebarDataLoading } =
     useGetWorkspaceSidebar({
-      token: session?.session.token!,
+      token: session?.session.token as string,
       userId: currentWorkspace.userId,
       workspaceName: currentWorkspace.name,
+      queryConfig: {
+        enabled: !!session?.session.token,
+      },
     });
 
   return (

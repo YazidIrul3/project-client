@@ -2,6 +2,7 @@ import { axiosInstance } from "@/lib/axios";
 import { MutationConfig, queryClient } from "@/lib/react-query";
 import { getWorkpacesQuery } from "./get-workspaces";
 import { useMutation } from "@tanstack/react-query";
+import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-workspace";
 
 type DeleteWorkspace = {
   token: string;
@@ -38,7 +39,6 @@ export const useDeleteWorkspace = (params: UseDeleteWorkspaceParams) => {
 
     onSuccess: (data, Variables, onMutateResult, context) => {
       queryClient.invalidateQueries({ queryKey: getWorkpacesQuery() });
-      // setCurrentWorkspace({ userId: Variables.userId, name: Variables.name });
 
       params.mutationConfig?.onSuccess?.(
         data,
