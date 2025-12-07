@@ -29,11 +29,63 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { Plus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import SheetSideBackground from "./sheet-side-background";
+import { useCreateProject } from "@/features/api/project/create-project";
+import { authClient } from "@/lib/auth-client";
+import { useState } from "react";
+import { toast } from "sonner";
+import { ProjectBodyRequest } from "@/types/api/project";
+import { useGetWorkspace } from "@/features/api/workspace/get-workspace";
+import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
+import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
 
 const CreateProjectSheet = () => {
   const { open } = useSidebar();
   const form = useForm();
   const { control } = form;
+  const { workspace: currentWorkspace } = useCurrentWorkspace();
+  const { data } = authClient.useSession();
+  const { data: workspace } = useGetWorkspaceSidebar({
+    token: data?.session.token as string,
+    userId: currentWorkspace.userId,
+    workspaceName: currentWorkspace.name,
+  });
+  const [bodyRequest, setBodyRequest] = useState<ProjectBodyRequest>({
+    name: "",
+    template: "",
+  });
+  const { mutate: createProjectMutaion } = useCreateProject({
+    token: data?.session.token as string,
+    mutationConfig: {
+      onSuccess: () => {
+        toast.success("Create project success");
+
+        window.location.reload();
+      },
+    },
+  });
+
+  const handleOnChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+
+    setBodyRequest((prev) => {
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
+  };
+
+  const handleOnSubmit = () => {
+    createProjectMutaion({
+      name: bodyRequest.name,
+      workspaceId: workspace?.id,
+      template: bodyRequest.template,
+    });
+
+    setBodyRequest({ name: "", template: "" });
+  };
 
   return (
     <Sheet>
@@ -72,7 +124,7 @@ const CreateProjectSheet = () => {
                         name="name"
                         onChange={(e) => {
                           field.onChange(e);
-                          //   handleOnChange(e);
+                          handleOnChange(e);
                         }}
                       />
                     </FormControl>
@@ -82,14 +134,23 @@ const CreateProjectSheet = () => {
 
               <FormField
                 control={control}
-                name="timezone"
+                name="template"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Template Project</FormLabel>
                     <FormControl className=" lg:w-9/12 w-full">
-                      <Select defaultValue="default">
+                      <Select
+                        name="template"
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          handleOnChange({
+                            target: { name: "template", value },
+                          } as any);
+                        }}
+                        defaultValue="default"
+                      >
                         <SelectTrigger value={"tes"}>
-                          <SelectValue placeholder="Select a timezone" />
+                          <SelectValue placeholder="Select a template" />
                         </SelectTrigger>
 
                         <SelectContent className=" capitalize">
@@ -114,7 +175,7 @@ const CreateProjectSheet = () => {
                     Cancel
                   </Button> */}
               <Button
-                // onClick={handleOnSubmit}
+                onClick={handleOnSubmit}
                 className=" justify-start flex font-normal text-sm px-4 w-fit"
               >
                 Create

@@ -5,12 +5,23 @@ import Images from "@/helpers/images";
 import { Label } from "@radix-ui/react-label";
 import Image from "next/image";
 import { GoogleLogoIcon } from "@phosphor-icons/react";
-import React from "react";
-import { useGetSession } from "../../api/user/get-session";
 import { useLoginForm } from "../_hooks/useLoginForm";
+import { authClient } from "@/lib/auth-client";
+import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-workspace";
 
 export const LoginForm = () => {
   const { onSubmit } = useLoginForm();
+  const { data } = authClient.useSession();
+  const { setCurrentWorkspace } = useCurrentWorkspace();
+
+  const handleOnSubmit = () => {
+    onSubmit();
+
+    setCurrentWorkspace({
+      name: `${data?.user.name}'s Space`,
+      userId: data?.user.id as string,
+    });
+  };
 
   return (
     <div className=" flex flex-col gap-7 justify-center items-center w-full max-w-sm">
@@ -32,7 +43,7 @@ export const LoginForm = () => {
         </div>
       </div>
 
-      <Button onClick={onSubmit} variant={"outline"} className=" ">
+      <Button onClick={handleOnSubmit} variant={"outline"} className=" ">
         <div className=" text-2xl">
           <GoogleLogoIcon weight="bold" />
         </div>

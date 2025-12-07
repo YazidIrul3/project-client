@@ -1,7 +1,7 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useCreateWorkspace } from "@/features/api/workspace/create-workspace";
 import { authClient } from "@/lib/auth-client";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ComponentType, useEffect } from "react";
 
 type WithAuthOptions = {

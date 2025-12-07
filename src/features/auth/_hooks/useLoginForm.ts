@@ -6,7 +6,7 @@ export const useLoginForm = () => {
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "http://localhost:3000/profile",
+        callbackURL: "http://localhost:3000/account/profile",
 
         fetchOptions: {
           onSuccess: async () => {

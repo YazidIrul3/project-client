@@ -35,14 +35,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import withAuthUser from "@/utils/withAuthUser";
 import { authClient } from "@/lib/auth-client";
+import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
 
 export const ProfileSection = () => {
   const [nameInputValue, setNameInputValue] = useState<string>("");
   const { data: profile, isLoading: fetchProfileLoading } = useGetProfile(
     authClient.useSession().data?.session.token
   );
+  const { setCurrentWorkspace } = useCurrentWorkspace();
   const { mutate: updateUserMutation, isPending: updateUserLoading } =
     useUpdateUser({
       mutationConfig: {
