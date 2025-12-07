@@ -5,15 +5,15 @@ import z, { string } from "zod";
 import { User } from "better-auth";
 import { getProjectQuery } from "./create-project";
 
-const updatProjectchemaSchema = z.object({
+const updatProjectSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  timezone: z.string("Timezone must be string"),
+  // timezone: z.string("Timezone must be string"),
 });
 
-export type UpdatProjectchema = z.infer<typeof updatProjectchemaSchema>;
+export type UpdatProjectSchema = z.infer<typeof updatProjectSchema>;
 
-export const updatWorkspace = async (
-  data: UpdatProjectchema,
+export const updatProject = async (
+  data: UpdatProjectSchema,
   token: string,
   id: string
 ) => {
@@ -26,13 +26,13 @@ export const updatWorkspace = async (
   return res.data;
 };
 
-type UseUpdateWorkspaceOptions = {
+type UseUpdateProjectOptions = {
   token: string;
   id: string;
-  mutationConfig?: MutationConfig<typeof updatWorkspace>;
+  mutationConfig?: MutationConfig<typeof updatProject>;
 };
 
-export const useUpdatWorkspace = (params: UseUpdateWorkspaceOptions) => {
+export const useUpdatProject = (params: UseUpdateProjectOptions) => {
   const queryClient = useQueryClient();
 
   const { onSuccess, ...restConfig } = params.mutationConfig || {};
@@ -40,8 +40,8 @@ export const useUpdatWorkspace = (params: UseUpdateWorkspaceOptions) => {
   return useMutation({
     ...params.mutationConfig,
 
-    mutationFn: (body: UpdatProjectchema) => {
-      return updatWorkspace(body, params.token, params.id);
+    mutationFn: (body: UpdatProjectSchema) => {
+      return updatProject(body, params.token, params.id);
     },
 
     onSuccess: (data, Variables, onMutateResult, context) => {

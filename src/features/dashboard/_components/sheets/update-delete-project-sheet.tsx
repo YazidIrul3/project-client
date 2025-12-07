@@ -36,6 +36,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import DeleteProjectSheet from "./delete-project-sheet";
+import { useUpdatProject } from "@/features/api/project/update-project";
 
 type UpdateDeleteProjectSheet = {
   id: string;
@@ -52,6 +53,17 @@ const UpdateDeleteProjectSheet = (props: UpdateDeleteProjectSheet) => {
     name: props?.name,
     template: "",
   });
+  const { mutate: updateProjectMutation } = useUpdatProject({
+    id: props.id,
+    token: session?.session.token as string,
+    mutationConfig: {
+      onSuccess: () => {
+        toast.success("Update project success");
+
+        window.location.reload();
+      },
+    },
+  });
 
   const handleOnChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -66,11 +78,20 @@ const UpdateDeleteProjectSheet = (props: UpdateDeleteProjectSheet) => {
     });
   };
 
+  const handleOnSubmit = () => {
+    updateProjectMutation({
+      name: bodyRequest.name,
+    });
+
+    setBodyRequest({
+      name: props.name,
+      template: "",
+    });
+  };
+
   const handleOnDelete = () => {
     //   router.refresh();
   };
-
-  console.log(props.name);
 
   return (
     <Sheet>
@@ -133,7 +154,7 @@ const UpdateDeleteProjectSheet = (props: UpdateDeleteProjectSheet) => {
               </CardHeader>
 
               <CardFooter>
-                <DeleteProjectSheet />
+                <DeleteProjectSheet id={props.id} />
               </CardFooter>
             </Card>
 
@@ -145,7 +166,7 @@ const UpdateDeleteProjectSheet = (props: UpdateDeleteProjectSheet) => {
                     Cancel
                   </Button> */}
               <Button
-                // onClick={handleOnSubmit}
+                onClick={handleOnSubmit}
                 className=" justify-start flex font-normal text-sm px-4 w-fit"
               >
                 Save

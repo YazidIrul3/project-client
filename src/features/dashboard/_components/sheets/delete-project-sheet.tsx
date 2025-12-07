@@ -7,41 +7,25 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
-import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
-import { useDeleteWorkspace } from "@/features/api/workspace/delete-workspace";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useDeleteProject } from "@/features/api/project/delete-project";
+import { Form } from "@/components/ui/form";
 
-const DeleteProjectSheet = () => {
-  const { workspace: currentWorkspace } = useCurrentWorkspace();
+type DeleteProjectSheet = {
+  id: string;
+};
+
+const DeleteProjectSheet = (props: DeleteProjectSheet) => {
   const { data: session } = authClient.useSession();
-  const router = useRouter();
-  const { data: workspace, isLoading: workspaceSidebarDataLoading } =
-    useGetWorkspaceSidebar({
-      token: session?.session.token as string,
-      userId: currentWorkspace.userId,
-      workspaceName: currentWorkspace.name,
-    });
-  const { setCurrentWorkspace } = useCurrentWorkspace();
-  const { mutate: deleteWorkspaceMutation } = useDeleteWorkspace({
-    token: session?.session.token!,
-    id: workspace?.id,
+  const { mutate: deleteProjectMutation } = useDeleteProject({
+    token: session?.session.token as string,
+    id: props?.id,
     mutationConfig: {
       onSuccess: () => {
-        toast.success("Delete workspace success");
+        toast.success("Delete Project success");
 
         window.location.reload();
       },
@@ -51,17 +35,10 @@ const DeleteProjectSheet = () => {
 
   const handleOnDelete = () => {
     if (session) {
-      deleteWorkspaceMutation({
+      deleteProjectMutation({
         token: session?.session.token as string,
-        id: workspace?.id,
+        id: props?.id,
       });
-
-      setCurrentWorkspace({
-        userId: session?.user.id,
-        name: `${session?.user.name}'s Space`,
-      });
-
-      //   router.refresh();
     }
   };
 

@@ -65,8 +65,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       userId: workspace.userId,
     });
 
-  console.log(workspaceSidebarData?.projects?.data);
-
   return (
     <div>
       {workspaceSidebarDataLoading || workspaceByUserLoading ? null : ( // <Spinner />
@@ -252,7 +250,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           href={`/project/${item?.id}`}
                           className=" w-full flex flex-row justify-between items-center hover:bg-slate-100 px-2 py-3 text-sm font-semibold rounded-xl truncate whitespace-nowrap line-clamp-1"
                         >
-                          <h1 className=" w-11/12 truncate">{item?.name} fdafdsjfkladjflkjdaslkjfldkjaflksjklj</h1>
+                          <h1 className=" w-11/12 truncate">{item?.name}</h1>
 
                           <UpdateDeleteProjectSheet
                             id={item?.id}
