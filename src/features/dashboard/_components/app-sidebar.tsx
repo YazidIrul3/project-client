@@ -7,7 +7,6 @@ import {
   ChevronRight,
   ChevronUp,
   Plus,
-  Settings2Icon,
   SettingsIcon,
 } from "lucide-react";
 
@@ -36,13 +35,13 @@ import { useLogout } from "@/hooks/useLogout";
 import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
 import { authClient } from "@/lib/auth-client";
 import { useCurrentWorkspace } from "../_hooks/use-current-workspace";
-import { Spinner } from "@/components/ui/spinner";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 import { useGetWorkspacesByUser } from "@/features/api/workspace/get-user-workspaces";
 import CreateWorkspaceSheet from "./sheets/create-workspace-sheet";
 import { WorkspaceEntity } from "@/types/api/workspace";
 import CreateProjectSheet from "./sheets/create-project-sheet";
 import { useRouter } from "next/navigation";
+import UpdateDeleteProjectSheet from "./sheets/update-delete-project-sheet";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { onClick } = useLogout();
@@ -65,6 +64,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       token: session?.session.token!,
       userId: workspace.userId,
     });
+
+  console.log(workspaceSidebarData?.projects?.data);
 
   return (
     <div>
@@ -237,20 +238,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </div>
             </SidebarGroup>
 
-            <SidebarGroup className=" flex flex-col gap-3 mt-4">
+            <SidebarGroup className=" flex flex-col mt-4">
               <div className={`${open ? "flex" : "hidden"} `}>
                 <h3 className={` text-sm font-semibold`}>Project</h3>
               </div>
 
               {workspaceSidebarData?.projects?.length > 0
                 ? workspaceSidebarData?.projects?.map(
-                    (item: WorkspaceEntity) => {
+                    (item: WorkspaceEntity, i: number) => {
                       return (
                         <Link
-                          href={item?.id}
-                          className=" bg-slate-100 p-2 text-sm font-semibold rounded-xl truncate whitespace-nowrap line-clamp-1"
+                          key={i}
+                          href={`/project/${item?.id}`}
+                          className=" w-full flex flex-row justify-between items-center hover:bg-slate-100 px-2 py-3 text-sm font-semibold rounded-xl truncate whitespace-nowrap line-clamp-1"
                         >
-                          {item?.name}
+                          <h1 className=" w-11/12 truncate">{item?.name} fdafdsjfkladjflkjdaslkjfldkjaflksjklj</h1>
+
+                          <UpdateDeleteProjectSheet
+                            id={item?.id}
+                            name={item?.name}
+                          />
                         </Link>
                       );
                     }

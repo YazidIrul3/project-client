@@ -23,7 +23,6 @@ import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-s
 import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
 import { authClient } from "@/lib/auth-client";
 import { Input } from "@/components/ui/input";
-import withAuthUser from "@/utils/withAuthUser";
 import React, { useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -36,10 +35,8 @@ import {
 } from "@/components/ui/select";
 import { WorkspaceupdateEntity } from "@/types/api/workspace";
 import { useUpdatWorkspace } from "@/features/api/workspace/update-workspace";
-import { useDeleteWorkspace } from "@/features/api/workspace/delete-workspace";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import DeleteWorkspaceSheet from "../../_components/sheets/delete-workspace-sheet";
+import { toast } from "sonner";
 
 export const WorkspaceOverview = () => {
   const form = useForm();
@@ -61,11 +58,16 @@ export const WorkspaceOverview = () => {
   const [bodyRequest, setBodyRequest] = useState<WorkspaceupdateEntity>({
     name: workspace?.name,
     avatar: "",
-    timezone: "",
+    timezone: workspace?.timezone,
   });
   const { mutate: updateWorkspaceMutation } = useUpdatWorkspace({
     id: workspace?.id,
-    token: session?.session.token!,
+    token: session?.session.token as string,
+    mutationConfig: {
+      onSuccess: () => {
+        toast.success("Update workspace success");
+      },
+    },
   });
 
   const handleOnChange = (
@@ -82,8 +84,16 @@ export const WorkspaceOverview = () => {
   };
 
   const handleOnSubmit = () => {
-    updateWorkspaceMutation({ name: workspace?.name, timezone: "" });
-    setBodyRequest({ name: workspace?.name, avatar: "", timezone: "" });
+    updateWorkspaceMutation({
+      name: bodyRequest?.name as string,
+      timezone: "",
+    });
+
+    setBodyRequest({
+      name: workspace?.name,
+      avatar: "",
+      timezone: workspace?.timezone,
+    });
   };
 
   return (
@@ -126,6 +136,7 @@ export const WorkspaceOverview = () => {
                 <FormLabel className=" mb-2">Timezone</FormLabel>
                 <FormControl className=" lg:w-9/12 w-full">
                   <Select
+                    defaultValue={bodyRequest?.timezone}
                     name="timezone"
                     onValueChange={(value) => {
                       field.onChange(value);
