@@ -3,21 +3,21 @@ import { MutationConfig } from "@/lib/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import z, { string } from "zod";
 import { User } from "better-auth";
-import { getProjectQuery } from "./create-project";
+import { getProjectGroupQuery } from "./create-projectGroup";
 
-const updateProjectSchema = z.object({
+const updateProjectGroupSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  // timezone: z.string("Timezone must be string"),
+  color: z.string("Color must be string"),
 });
 
-export type UpdateProjectSchema = z.infer<typeof updateProjectSchema>;
+export type UpdateProjectGroupSchema = z.infer<typeof updateProjectGroupSchema>;
 
-export const updateProject = async (
-  data: UpdateProjectSchema,
+export const updateProjectGroup = async (
+  data: UpdateProjectGroupSchema,
   token: string,
   id: string
 ) => {
-  const res = await axiosInstance.put(`/project/${id}`, data, {
+  const res = await axiosInstance.put(`/projectGroup/${id}`, data, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -26,13 +26,13 @@ export const updateProject = async (
   return res.data;
 };
 
-type UseUpdateProjectOptions = {
+type UseUpdateProjectGroupOptions = {
   token: string;
   id: string;
-  mutationConfig?: MutationConfig<typeof updateProject>;
+  mutationConfig?: MutationConfig<typeof updateProjectGroup>;
 };
 
-export const useUpdateProject = (params: UseUpdateProjectOptions) => {
+export const useUpdateProjectGroup = (params: UseUpdateProjectGroupOptions) => {
   const queryClient = useQueryClient();
 
   const { onSuccess, ...restConfig } = params.mutationConfig || {};
@@ -40,12 +40,12 @@ export const useUpdateProject = (params: UseUpdateProjectOptions) => {
   return useMutation({
     ...params.mutationConfig,
 
-    mutationFn: (body: UpdateProjectSchema) => {
-      return updateProject(body, params.token, params.id);
+    mutationFn: (body: UpdateProjectGroupSchema) => {
+      return updateProjectGroup(body, params.token, params.id);
     },
 
     onSuccess: (data, Variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: getProjectQuery() });
+      queryClient.invalidateQueries({ queryKey: getProjectGroupQuery() });
 
       params.mutationConfig?.onSuccess?.(
         data,

@@ -3,19 +3,13 @@ import { SettingsIcon } from "lucide-react";
 import CreateItemProject from "./create-item-project";
 import ItemProject from "./item-project";
 import { ItemProjectGroupEntity } from "@/types/api/project-group";
-import CreateProjectGroupSheet from "../../_components/sheets/create-projectGroup-sheet ";
+import UpdateProjectGroupSheet from "../../_components/sheets/update-projectGroup-sheet";
 
 type CardProjectGroup = {
   data?: ItemProjectGroupEntity;
 };
 
 const CardProjectGroup = (props: CardProjectGroup) => {
-  const CardProjectGroupStyle: React.CSSProperties = {
-    color: "white",
-    backgroundColor: "DodgerBlue",
-    padding: "10px",
-    fontFamily: "Sans-Serif",
-  };
   return (
     <Card className=" min-w-[300px] p-3">
       <div className=" flex flex-row items-center justify-between px-2">
@@ -30,7 +24,10 @@ const CardProjectGroup = (props: CardProjectGroup) => {
         </CardTitle>
 
         <div className=" flex flex-row gap-4">
-          {/* <CreateProjectGroupSheet /> */}
+          <UpdateProjectGroupSheet
+            data={props.data}
+            id={props.data?.id as string}
+          />
           <SettingsIcon size={20} />
         </div>
       </div>

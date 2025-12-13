@@ -32,7 +32,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import DeleteProjectSheet from "./delete-project-sheet";
-import { useUpdatProject } from "@/features/api/project/update-project";
+import { useUpdateProject } from "@/features/api/project/update-project";
 
 type UpdateDeleteProjectSheet = {
   id: string;
@@ -48,7 +48,7 @@ const UpdateDeleteProjectSheet = (props: UpdateDeleteProjectSheet) => {
     name: props?.name,
     template: "",
   });
-  const { mutate: updateProjectMutation } = useUpdatProject({
+  const { mutate: updateProjectMutation } = useUpdateProject({
     id: props.id,
     token: session?.session.token as string,
     mutationConfig: {
