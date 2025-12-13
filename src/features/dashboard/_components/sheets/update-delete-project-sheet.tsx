@@ -7,11 +7,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
-import { useDeleteWorkspace } from "@/features/api/workspace/delete-workspace";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +23,6 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { SettingsIcon } from "lucide-react";
 import { ProjectBodyRequest } from "@/types/api/project";
-import { useGetProject } from "@/features/api/project/get-project";
 import SheetSideBackground from "./sheet-side-background";
 import {
   Card,
@@ -44,7 +40,6 @@ type UpdateDeleteProjectSheet = {
 };
 
 const UpdateDeleteProjectSheet = (props: UpdateDeleteProjectSheet) => {
-  const { workspace: currentWorkspace } = useCurrentWorkspace();
   const { data: session } = authClient.useSession();
   const router = useRouter();
   const form = useForm();
@@ -87,10 +82,6 @@ const UpdateDeleteProjectSheet = (props: UpdateDeleteProjectSheet) => {
       name: props.name,
       template: "",
     });
-  };
-
-  const handleOnDelete = () => {
-    //   router.refresh();
   };
 
   return (

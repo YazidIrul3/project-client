@@ -26,7 +26,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useSidebar } from "@/components/ui/sidebar";
-import { Plus } from "lucide-react";
+import { Plus, SettingsIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import SheetSideBackground from "./sheet-side-background";
 import { useCreateProject } from "@/features/api/project/create-project";
@@ -37,31 +37,24 @@ import { ProjectBodyRequest } from "@/types/api/project";
 import { useGetWorkspace } from "@/features/api/workspace/get-workspace";
 import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
 import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
+import { Card } from "@/components/ui/card";
+import { ProjectGroupBodyRequest } from "@/types/api/project-group";
+import { ProjectGroupColors } from "@/helpers/color";
+import { useCreateProjectGroup } from "@/features/api/projectGroup/create-projectGroup";
+import { create } from "domain";
 
-const CreateProjectSheet = () => {
-  const { open } = useSidebar();
+type CreateProjectGroupSheetProps = {
+  projectId: string;
+};
+
+const CreateProjectGroupSheet = (props: CreateProjectGroupSheetProps) => {
   const form = useForm();
   const { control } = form;
-  const { workspace: currentWorkspace } = useCurrentWorkspace();
   const { data } = authClient.useSession();
-  const { data: workspace } = useGetWorkspaceSidebar({
-    token: data?.session.token as string,
-    userId: currentWorkspace.userId,
-    workspaceName: currentWorkspace.name,
-  });
-  const [bodyRequest, setBodyRequest] = useState<ProjectBodyRequest>({
+  const [bodyRequest, setBodyRequest] = useState<ProjectGroupBodyRequest>({
     name: "",
-    template: "default",
-  });
-  const { mutate: createProjectMutaion } = useCreateProject({
-    token: data?.session.token as string,
-    mutationConfig: {
-      onSuccess: () => {
-        toast.success("Create project success");
-
-        window.location.reload();
-      },
-    },
+    color: ProjectGroupColors[0].value,
+    projectId: props.projectId,
   });
 
   const handleOnChange = (
@@ -77,14 +70,34 @@ const CreateProjectSheet = () => {
     });
   };
 
+  const { mutate: createProjectGroupMutation } = useCreateProjectGroup({
+    token: data?.session.token as string,
+    mutationConfig: {
+      onSuccess: (data) => {
+        toast.success("Project Group created successfully");
+
+        window.location.reload();
+      },
+      onError: (error: any) => {
+        toast.error(
+          error?.response?.data?.message || "Failed to create Project Group"
+        );
+      },
+    },
+  });
+
   const handleOnSubmit = () => {
-    createProjectMutaion({
-      name: bodyRequest.name,
-      workspaceId: workspace?.id,
-      template: bodyRequest.template,
+    createProjectGroupMutation({
+      color: bodyRequest.color as string,
+      name: bodyRequest.name as string,
+      projectId: props.projectId,
     });
 
-    setBodyRequest({ name: "", template: "default" });
+    setBodyRequest({
+      name: "",
+      color: ProjectGroupColors[0].value,
+      projectId: props.projectId,
+    });
   };
 
   return (
@@ -93,10 +106,14 @@ const CreateProjectSheet = () => {
         asChild
         className=" min-w-full justify-start flex font-normal text-sm px-2 py-2"
       >
-        <Button className={` text-xs mx-auto w-fit`} variant={"secondary"}>
-          <Plus />
-          <h1 className={`${open ? "" : "hidden"}`}> Add Project</h1>
-        </Button>
+        <Card className="min-w-[300px] min-h-[200px] h-full flex relative">
+          <Button
+            variant={"ghost"}
+            className=" min-h-full h-full w-full absolute"
+          >
+            <Plus size={20} />
+          </Button>
+        </Card>
       </SheetTrigger>
 
       <SheetContent className=" flex flex-row justify-between  min-w-9/12 mx-auto h-fit translate-x-[-50%] translate-y-[-50%] left-1/2 top-1/2 rounded-xl ">
@@ -104,7 +121,7 @@ const CreateProjectSheet = () => {
           <div className=" flex flex-col w-full ">
             <SheetHeader className=" mb-3">
               <SheetTitle className=" text-xl font-bold">
-                Create New Project
+                Create New Project Group
               </SheetTitle>
               <SheetDescription>
                 Project will help you for making flow of your project
@@ -134,32 +151,30 @@ const CreateProjectSheet = () => {
 
               <FormField
                 control={control}
-                name="template"
+                name="color"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Template Project</FormLabel>
-                    <FormControl className=" lg:w-9/12 w-full">
-                      <Select
-                        name="template"
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          handleOnChange({
-                            target: { name: "template", value },
-                          } as any);
-                        }}
-                        defaultValue="default"
-                      >
-                        <SelectTrigger value={"tes"}>
-                          <SelectValue placeholder="Select a template" />
-                        </SelectTrigger>
-
-                        <SelectContent className=" capitalize">
-                          <SelectGroup>
-                            <SelectItem value="default">default</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
+                    <FormLabel>Group Color</FormLabel>
+                    <div className=" flex flex-row items-center gap-3">
+                      {ProjectGroupColors.map((item, i: number) => (
+                        <div
+                          key={i}
+                          onClick={() =>
+                            setBodyRequest({
+                              color: item.value,
+                            })
+                          }
+                          style={{
+                            backgroundColor: `${item.value}`,
+                          }}
+                          className={` flex flex-row gap-3 items-center w-[35px] h-[35px] rounded-full ${
+                            bodyRequest.color == item.value
+                              ? "outline-2 outline-black"
+                              : "outline-none"
+                          }`}
+                        ></div>
+                      ))}
+                    </div>
 
                     <FormMessage />
                   </FormItem>
@@ -168,12 +183,6 @@ const CreateProjectSheet = () => {
             </div>
 
             <SheetFooter className="flex justify-end flex-row">
-              {/* <Button
-                    variant={"ghost"}
-                    className=" justify-start flex font-normal text-sm px-4 w-fit"
-                  >
-                    Cancel
-                  </Button> */}
               <Button
                 onClick={handleOnSubmit}
                 className=" justify-start flex font-normal text-sm px-4 w-fit"
@@ -190,4 +199,4 @@ const CreateProjectSheet = () => {
   );
 };
 
-export default CreateProjectSheet;
+export default CreateProjectGroupSheet;

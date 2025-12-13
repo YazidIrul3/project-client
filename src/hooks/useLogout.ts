@@ -12,6 +12,8 @@ export const useLogout = () => {
         fetchOptions: {
           onSuccess: () => {
             toast.success("Logout successful!");
+
+            router.push("/login");
           },
 
           onError: (err) => {

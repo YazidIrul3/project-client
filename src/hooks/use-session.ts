@@ -7,7 +7,7 @@ type Props = {
   setSession: (data: User) => void;
 };
 
-export const useSession = create<Props>()(
+export const useGetToken = create<Props>()(
   persist(
     (set, get) => ({
       user: {},
