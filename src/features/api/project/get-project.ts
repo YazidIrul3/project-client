@@ -23,8 +23,8 @@ export const getProjectQueryOptions = (id: string, token: string) => {
 
 type useGetProject = {
   token: string;
-  queryConfig?: QueryConfig<typeof getProjectQueryOptions>;
   id: string;
+  queryConfig?: QueryConfig<typeof getProjectQueryOptions>;
 };
 
 export const useGetProject = (params: useGetProject) => {

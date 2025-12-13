@@ -13,12 +13,14 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { useDeleteProject } from "@/features/api/project/delete-project";
 import { Form } from "@/components/ui/form";
+import { useRouter } from "next/navigation";
 
 type DeleteProjectSheet = {
   id: string;
 };
 
 const DeleteProjectSheet = (props: DeleteProjectSheet) => {
+  const router = useRouter();
   const { data: session } = authClient.useSession();
   const { mutate: deleteProjectMutation } = useDeleteProject({
     token: session?.session.token as string,
@@ -27,7 +29,7 @@ const DeleteProjectSheet = (props: DeleteProjectSheet) => {
       onSuccess: () => {
         toast.success("Delete Project success");
 
-        window.location.reload();
+        router.replace("/account/profile");
       },
     },
   });

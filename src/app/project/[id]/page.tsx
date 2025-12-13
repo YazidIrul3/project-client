@@ -1,6 +1,14 @@
 import ProjectPage from "@/features/dashboard/project/pages/ProjectPage";
 
-const Page = () => {
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
+
+const Page = ({ params }: PageProps) => {
+  console.log(params?.id);
+
   return <ProjectPage />;
 };
 

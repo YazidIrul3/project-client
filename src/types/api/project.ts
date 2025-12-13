@@ -1,7 +1,7 @@
 import { Entity } from "./api";
 
 export type ItemProjectEntity = Entity<{
-  title: string;
+  name: string;
   description: string;
   startDate: Date;
   endDate: Date;
