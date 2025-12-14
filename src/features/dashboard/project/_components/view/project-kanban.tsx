@@ -9,7 +9,7 @@ type ProjectKanbanView = {
 
 const ProjectKanbanView = (props: ProjectKanbanView) => {
   return (
-    <div className=" flex flex-row gap-3 overflow-x-scroll w-full scrollbar-hide min-h-full">
+    <div className=" flex flex-row gap-3 overflow-x-scroll overflow-y-hidden w-full scrollbar-hide">
       {props.projectGroups?.map((group: any) => (
         <CardProjectGroup key={group.id} data={group} />
       ))}

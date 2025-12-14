@@ -1,22 +1,9 @@
 import { useGetProject } from "@/features/api/project/get-project";
 import DashbaordLayout from "../../_components/layout";
-import CardProjectGroup from "./project-group-card";
 import { authClient } from "@/lib/auth-client";
 import { ItemProjectGroupEntity } from "@/types/api/project-group";
 import { ItemProjectEntity } from "@/types/api/project";
-import { Card } from "@/components/ui/card";
-import { Plus } from "lucide-react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
 import ProjectKanbanView from "./view/project-kanban";
 
 type ProjectSectionHeaderProps = {
