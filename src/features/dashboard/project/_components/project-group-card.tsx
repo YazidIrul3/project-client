@@ -4,12 +4,20 @@ import CreateItemProject from "./create-item-project";
 import ItemProject from "./item-project";
 import { ItemProjectGroupEntity } from "@/types/api/project-group";
 import UpdateProjectGroupSheet from "../../_components/sheets/update-projectGroup-sheet";
+import { useGetItemProjectGroupByProjectGroupId } from "@/features/api/itemProject/get-itemProject";
+import { authClient } from "@/lib/auth-client";
 
 type CardProjectGroup = {
   data?: ItemProjectGroupEntity;
 };
 
 const CardProjectGroup = (props: CardProjectGroup) => {
+  const { data: user } = authClient.useSession();
+  const { data: itemProjectGroups } = useGetItemProjectGroupByProjectGroupId({
+    token: user?.session.token as string,
+    projectGroupId: props.data?.id as string,
+  });
+
   return (
     <Card className=" min-w-[300px] p-3">
       <div className=" flex flex-row items-center justify-between px-2">
@@ -20,7 +28,7 @@ const CardProjectGroup = (props: CardProjectGroup) => {
             }}
             className={`h-[13px] w-[13px] rounded-full `}
           ></div>
-          <h1 className=" font-bold text-sm capitalize">{props.data?.name}</h1>
+          <h1 className=" font-bold text-sm capitalize">{props.data?.title}</h1>
         </CardTitle>
 
         <div className=" flex flex-row gap-4">
@@ -33,8 +41,15 @@ const CardProjectGroup = (props: CardProjectGroup) => {
       </div>
 
       <CardContent className=" flex flex-col gap-3">
-        <ItemProject data={""} />
-        <CreateItemProject id={props.data?.id as string} />
+        {itemProjectGroups?.data?.map(
+          (item: ItemProjectGroupEntity, i: number) => {
+            return <ItemProject key={i} data={item} />;
+          }
+        )}
+        <CreateItemProject
+          borderColor={props.data?.color as string}
+          id={props.data?.id as string}
+        />
       </CardContent>
     </Card>
   );

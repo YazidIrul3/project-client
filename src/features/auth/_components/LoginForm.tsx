@@ -23,8 +23,6 @@ export const LoginForm = () => {
     });
   };
 
-  console.log(document.referrer);
-
   return (
     <div className=" flex flex-col gap-7 justify-center items-center w-full max-w-sm">
       <div className=" flex flex-col gap-7 justify-center items-center">

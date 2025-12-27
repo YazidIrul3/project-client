@@ -2,34 +2,52 @@ import { axiosInstance } from "@/lib/axios";
 import { QueryConfig } from "@/lib/react-query";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
-export const getProject = async (id: string, token: string) => {
-  const response = await axiosInstance.get(`/project/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const getItemProjectGroupByProjectGroupId = async (
+  projectGroupId: string,
+  token: string
+) => {
+  const response = await axiosInstance.get(
+    `/itemProjectGroup/${projectGroupId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
   return response.data;
 };
 
-export const getProjectQuery = (id: string) => ["project", id];
+export const getItemProjectGroupByProjectGroupIdQuery = (
+  projectGroupId: string
+) => ["itemProjectGroup", projectGroupId];
 
-export const getProjectQueryOptions = (id: string, token: string) => {
+export const getItemProjectGroupByProjectGroupIdQueryOptions = (
+  projectGroupId: string,
+  token: string
+) => {
   return queryOptions({
-    queryKey: getProjectQuery(id),
-    queryFn: () => getProject(id, token),
+    queryKey: getItemProjectGroupByProjectGroupIdQuery(projectGroupId),
+    queryFn: () => getItemProjectGroupByProjectGroupId(projectGroupId, token),
   });
 };
 
-type useGetProject = {
+type useGetItemProjectGroupByProjectGroupId = {
   token: string;
-  id: string;
-  queryConfig?: QueryConfig<typeof getProjectQueryOptions>;
+  projectGroupId: string;
+  queryConfig?: QueryConfig<
+    typeof getItemProjectGroupByProjectGroupIdQueryOptions
+  >;
 };
 
-export const useGetProject = (params: useGetProject) => {
+export const useGetItemProjectGroupByProjectGroupId = (
+  params: useGetItemProjectGroupByProjectGroupId
+) => {
   return useQuery({
-    ...getProjectQueryOptions(params.id, params.token),
+    ...getItemProjectGroupByProjectGroupIdQueryOptions(
+      params.projectGroupId,
+      params.token
+    ),
     ...params.queryConfig,
   });
 };

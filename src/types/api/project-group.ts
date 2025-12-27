@@ -2,7 +2,7 @@ import { Entity } from "./api";
 
 export type ItemProjectGroupEntity = Entity<{
   id: string;
-  name: string;
+  title: string;
   color: string;
   projectId: string;
 }>;

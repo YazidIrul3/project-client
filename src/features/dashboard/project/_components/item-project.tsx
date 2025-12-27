@@ -14,10 +14,10 @@ import { Plus } from "lucide-react";
 import SheetSideBackground from "../../_components/sheets/sheet-side-background";
 import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { ItemProjectEntity } from "@/types/api/project";
+import { ItemProjectGroupEntity } from "@/types/api/project-group";
 
 type Props = {
-  data: ItemProjectEntity | any;
+  data: ItemProjectGroupEntity;
 };
 
 const ItemProject = (props: Props) => {
@@ -28,9 +28,7 @@ const ItemProject = (props: Props) => {
     <Sheet>
       <SheetTrigger asChild className=" min-w-full ">
         <Button variant={"outline"} className=" max-w-0">
-          <h1 className=" truncate max-w-11/12">
-            ffasdfasdfasdfasdfasdfsadfadsfasdfasdfa
-          </h1>
+          <h1 className=" truncate max-w-11/12">{props.data.title}</h1>
         </Button>
       </SheetTrigger>
 

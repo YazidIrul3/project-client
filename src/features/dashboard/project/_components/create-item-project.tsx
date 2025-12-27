@@ -49,6 +49,7 @@ import { toast } from "sonner";
 
 type CreateItemProjectProps = {
   id: string;
+  borderColor: string;
 };
 
 const CreateItemProject = (props: CreateItemProjectProps) => {
@@ -172,7 +173,10 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
     <Sheet>
       <SheetTrigger
         asChild
-        className=" min-w-full border-dashed border-red-500 border-2"
+        style={{
+          borderColor: props.borderColor || "gray",
+        }}
+        className=" min-w-full border-dashed border-2"
       >
         <Button variant={"ghost"}>
           <Plus />
