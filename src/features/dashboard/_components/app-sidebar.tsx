@@ -31,7 +31,7 @@ import {
 import ItemSidebar from "./item-sidebar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useLogout } from "@/hooks/useLogout";
+import { useLogout } from "@/hooks/use-logout";
 import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
 import { authClient } from "@/lib/auth-client";
 import { useCurrentWorkspace } from "../_hooks/use-current-workspace";

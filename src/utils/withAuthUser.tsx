@@ -43,7 +43,7 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
           });
         }
 
-        router.push(redirectUrl || "");
+        router.push("");
       } else {
         router.push("/login");
       }

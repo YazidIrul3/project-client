@@ -34,7 +34,7 @@ const CardProjectGroup = (props: CardProjectGroup) => {
 
       <CardContent className=" flex flex-col gap-3">
         <ItemProject data={""} />
-        <CreateItemProject />
+        <CreateItemProject id={props.data?.id as string} />
       </CardContent>
     </Card>
   );
