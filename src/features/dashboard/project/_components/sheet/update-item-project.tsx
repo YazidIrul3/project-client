@@ -10,7 +10,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Calendar, CircleDashed, Plus, UsersRound } from "lucide-react";
+import { Calendar, CircleDashed, Pencil, Plus, UsersRound } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -35,53 +35,54 @@ import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node";
 import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 import { authClient } from "@/lib/auth-client";
-import {
-  createItemProjectGroup,
-  useCreateItemProjectGroup,
-} from "@/features/api/itemProject/create-itemProjectGroup";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DateTimePicker } from "@/components/shared/datetime-picker";
-import { ItemProjectGroupBodyRequest } from "../../../../types/api/item-project-group";
 import { SelectPriority } from "@/components/shared/select-priority";
 import { SelectAssigned } from "@/components/shared/select-assigned";
-import SheetSideBackground from "../../_components/sheets/sheet-side-background";
 import { toast } from "sonner";
+import {
+  ItemProjectGroupBodyRequest,
+  ItemProjectGroupEntity,
+} from "@/types/api/item-project-group";
+import SheetSideBackground from "@/features/dashboard/_components/sheets/sheet-side-background";
+import { useUpdateItemProjectGroup } from "@/features/api/itemProject/update-itemProject";
+import { email } from "zod";
 
-type CreateItemProjectProps = {
-  id: string;
-  borderColor: string;
+type AssignedType = {
+  assigned: {
+    id: string;
+    name: string;
+    email: string;
+  };
 };
 
-const CreateItemProject = (props: CreateItemProjectProps) => {
+const UpdateItemProjectSheet = ({
+  data,
+  projectGroupId,
+}: {
+  data: ItemProjectGroupEntity;
+  projectGroupId: string;
+}) => {
   const form = useForm();
-  const { data } = authClient.useSession();
+  const { data: user } = authClient.useSession();
   const [bodyRequest, setBodyRequest] = useState<ItemProjectGroupBodyRequest>({
-    title: "",
-    description: "",
-    projectGroupId: props.id,
-    startDate: new Date(),
-    endDate: new Date(),
-    startTime: "07:00",
-    endTime: "07:00",
-    priority: "LOW",
-    assignedUsers: [
-      {
-        name: data?.user.name as string,
-        id: data?.user.id as string,
-        email: data?.user.email as string,
-      },
-    ],
+    title: data?.title,
+    description: data.description,
+    projectGroupId: projectGroupId,
+    startDate: data.startDate,
+    endDate: data.endDate,
+    startTime: data.startDate.toString().split("T")[1],
+    endTime: data.endDate.toString().split("T")[1],
+    priority: data.priority,
+    assignedUsers: data.assignedUsers.map((item: AssignedType | any) => {
+      return {
+        id: item.assigned.id,
+        email: item.assigned.email,
+        name: item.assigned.name,
+      };
+    }) as any,
   });
-  const { mutate: CreateItemProjectMutate } = useCreateItemProjectGroup({
-    token: authClient.useSession().data?.session.token as string,
-    mutationConfig: {
-      onSuccess: (data) => {
-        toast.success("Create Item Project Success");
 
-        window.location.reload();
-      },
-    },
-  });
   const editor = useEditor({
     immediatelyRender: false,
     editorProps: {
@@ -121,6 +122,17 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
     ],
   });
   const { formState, control, handleSubmit } = form;
+  const { mutate: UpdateItemProjectMutate } = useUpdateItemProjectGroup({
+    id: data.id,
+    token: user?.session.token as string,
+    mutationConfig: {
+      onSuccess: () => {
+        toast.success("Update Item Project Success");
+
+        window.location.reload();
+      },
+    },
+  });
 
   const handleOnChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -136,7 +148,7 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
   };
 
   const handleOnSubmit = () => {
-    CreateItemProjectMutate({
+    UpdateItemProjectMutate({
       title: bodyRequest.title,
       endDate: bodyRequest.endDate,
       startDate: bodyRequest.startDate,
@@ -149,38 +161,39 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
     });
 
     setBodyRequest({
-      title: "",
-      description: "",
-      projectGroupId: props.id,
-      startDate: new Date(),
-      endDate: new Date(),
-      startTime: "07:00",
-      endTime: "07:00",
-      priority: "LOW",
-      assignedUsers: [
-        {
-          name: data?.user.name as string,
-          id: data?.user.id as string,
-          email: data?.user.email as string,
-        },
-      ],
+      title: data.title,
+      description: data.description,
+      projectGroupId: projectGroupId,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      startTime: data.startDate.toString().split("T")[1],
+      endTime: data.endDate.toString().split("T")[1],
+      priority: data.priority,
+      assignedUsers: data.assignedUsers.map((item: AssignedType | any) => {
+        return {
+          id: item.assigned.id,
+          email: item.assigned.email,
+          name: item.assigned.name,
+        };
+      }) as any,
     });
   };
 
-  console.log(bodyRequest.assignedUsers);
+  useEffect(() => {
+    if (data.description) {
+      editor?.commands.setContent(data.description);
+    }
+  }, [editor, data.description]);
+
+  console.log(projectGroupId);
 
   return (
     <Sheet>
-      <SheetTrigger
-        asChild
-        style={{
-          borderColor: props.borderColor || "gray",
-        }}
-        className=" min-w-full border-dashed border-2"
-      >
-        <Button variant={"ghost"}>
-          <Plus />
-        </Button>
+      <SheetTrigger asChild className=" min-w-full border-dashed border-2">
+        <div className=" flex flex-row items-center gap-1.5">
+          <Pencil size={10} strokeWidth={"3px"} className=" text-yellow-600" />
+          <p className="  font-semibold">Edit</p>
+        </div>
       </SheetTrigger>
 
       <SheetContent className=" flex flex-row  items-center min-w-11/12  h-11/12 translate-x-[-50%] translate-y-[-50%] left-1/2 top-1/2 rounded-xl px-4">
@@ -196,6 +209,7 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
                       <input
                         placeholder="Title Item"
                         name="title"
+                        value={bodyRequest.title}
                         onChange={(e) => {
                           field.onChange(e);
                           handleOnChange(e);
@@ -334,4 +348,4 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
   );
 };
 
-export default CreateItemProject;
+export default UpdateItemProjectSheet;

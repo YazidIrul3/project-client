@@ -1,17 +1,21 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SettingsIcon } from "lucide-react";
-import CreateItemProject from "./create-item-project";
-import ItemProject from "./item-project";
-import { ItemProjectGroupEntity } from "@/types/api/project-group";
-import UpdateProjectGroupSheet from "../../_components/sheets/update-projectGroup-sheet";
+import { EllipsisVertical, SettingsIcon } from "lucide-react";
+import CreateItemProject from "../../sheet/create-item-project";
+import { ProjectGroupEntity } from "@/types/api/project-group";
+import UpdateProjectGroupSheet from "../../../../_components/sheets/update-projectGroup-sheet";
 import { useGetItemProjectGroupByProjectGroupId } from "@/features/api/itemProject/get-itemProject";
 import { authClient } from "@/lib/auth-client";
+import { ItemProjectGroupEntity } from "@/types/api/item-project-group";
+import { Button } from "@/components/ui/button";
+import ItemProject from "../../item-project";
+import { useState } from "react";
+import { useHover } from "@/hooks/use-hover";
 
-type CardProjectGroup = {
-  data?: ItemProjectGroupEntity;
+type COlumnKanban = {
+  data?: ProjectGroupEntity;
 };
 
-const CardProjectGroup = (props: CardProjectGroup) => {
+const COlumnKanban = (props: COlumnKanban) => {
   const { data: user } = authClient.useSession();
   const { data: itemProjectGroups } = useGetItemProjectGroupByProjectGroupId({
     token: user?.session.token as string,
@@ -19,7 +23,7 @@ const CardProjectGroup = (props: CardProjectGroup) => {
   });
 
   return (
-    <Card className=" min-w-[300px] p-3">
+    <Card className=" min-w-[300px] min-h-[400px] p-3">
       <div className=" flex flex-row items-center justify-between px-2">
         <CardTitle className=" flex flex-row items-center gap-3">
           <div
@@ -28,7 +32,7 @@ const CardProjectGroup = (props: CardProjectGroup) => {
             }}
             className={`h-[13px] w-[13px] rounded-full `}
           ></div>
-          <h1 className=" font-bold text-sm capitalize">{props.data?.title}</h1>
+          <h1 className=" font-bold text-sm capitalize">{props.data?.name}</h1>
         </CardTitle>
 
         <div className=" flex flex-row gap-4">
@@ -43,7 +47,13 @@ const CardProjectGroup = (props: CardProjectGroup) => {
       <CardContent className=" flex flex-col gap-3">
         {itemProjectGroups?.data?.map(
           (item: ItemProjectGroupEntity, i: number) => {
-            return <ItemProject key={i} data={item} />;
+            return (
+              <ItemProject
+                key={i}
+                data={item}
+                projectGroupId={props?.data?.id as string}
+              />
+            );
           }
         )}
         <CreateItemProject
@@ -55,4 +65,4 @@ const CardProjectGroup = (props: CardProjectGroup) => {
   );
 };
 
-export default CardProjectGroup;
+export default COlumnKanban;

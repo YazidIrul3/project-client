@@ -191,8 +191,6 @@ export function SimpleEditor({ editor }: { editor: any }) {
     }
   }, [isMobile, mobileView]);
 
-  editor?.getJSON();
-
   return (
     <div className="simple-editor-wrapper mt-3">
       <EditorContext.Provider value={{ editor }}>

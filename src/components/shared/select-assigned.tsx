@@ -1,29 +1,35 @@
 import { Popover } from "@radix-ui/react-popover";
 import { PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Button } from "../ui/button";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "../ui/calendar";
 import { useState } from "react";
-import { Input } from "../ui/input";
 import { InputGroup, InputGroupInput } from "../ui/input-group";
 
-interface AssignedUser {
+interface AssignedCreateUser {
   id: string;
   email: string;
   name: string;
 }
 
+interface AssignedUpdateUser {
+  assigned: AssignedCreateUser;
+}
+
 type SelectAssignedProps = {
   name: string;
-  assignedData: AssignedUser[] | any; // ✅ ARRAY
-  onChange?: (users: AssignedUser[]) => void;
+  assignedData: AssignedCreateUser[] | AssignedUpdateUser | any; // ✅ ARRAY
+  onChange?: (users: AssignedCreateUser[] | AssignedUpdateUser) => void;
+  type?: string;
 };
 
-export const SelectAssigned = (props: SelectAssignedProps) => {
+export const SelectAssigned = ({
+  name,
+  assignedData,
+  onChange,
+  type = "create",
+}: SelectAssignedProps) => {
   const [date, setDate] = useState<Date>();
   const [searchInputValue, setSearchInputValue] = useState<string>("");
 
-  const assignedUsers = props.assignedData?.filter((item: AssignedUser) =>
+  const assignedUsers = assignedData?.filter((item: AssignedCreateUser) =>
     item.name.includes(searchInputValue)
   );
 
@@ -31,7 +37,7 @@ export const SelectAssigned = (props: SelectAssignedProps) => {
     <Popover>
       <PopoverTrigger asChild>
         <div className=" flex flex-row text-sm min-w-full shadow rounded-md p-2">
-          {props?.assignedData?.map((item: AssignedUser, i: number) => {
+          {assignedData?.map((item: AssignedCreateUser, i: number) => {
             return (
               <div
                 key={i}
@@ -54,7 +60,7 @@ export const SelectAssigned = (props: SelectAssignedProps) => {
           </InputGroup>
 
           <div>
-            {assignedUsers?.map((item: AssignedUser, i: number) => {
+            {assignedData?.map((item: AssignedCreateUser, i: number) => {
               return (
                 <div key={i} className=" flex flex-row items-center gap-2 py-2">
                   <div className="w-7.5 h-7.5 text-sm flex justify-center items-center text-slate-50 font-bold uppercase rounded-md bg-gray-500">

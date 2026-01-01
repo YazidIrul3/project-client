@@ -1,6 +1,6 @@
 import { Entity } from "./api";
 
-export type ItemProjectGroupModelEntity = Entity<{
+export type ItemProjectGroupEntity = Entity<{
   id: string;
   title: string;
   description: string;
@@ -10,7 +10,13 @@ export type ItemProjectGroupModelEntity = Entity<{
   startTime: Date;
   endTime: Date;
   priority: string;
-  assignedUsers: [];
+  assignedUsers: [
+    {
+      id: string;
+      email: string;
+      name: string;
+    }
+  ];
 }>;
 
 export type ItemProjectGroupBodyRequest = {
