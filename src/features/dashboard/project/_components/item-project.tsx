@@ -1,58 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
-  Calendar,
-  CircleDashed,
-  EllipsisVertical,
-  Pencil,
-  Plus,
-  Trash,
-  UsersRound,
-} from "lucide-react";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
-import { StarterKit } from "@tiptap/starter-kit";
-import { Image } from "@tiptap/extension-image";
-import { TaskItem, TaskList } from "@tiptap/extension-list";
-import { TextAlign } from "@tiptap/extension-text-align";
-import { Typography } from "@tiptap/extension-typography";
-import { Highlight } from "@tiptap/extension-highlight";
-import { Subscript } from "@tiptap/extension-subscript";
-import { Superscript } from "@tiptap/extension-superscript";
-import { Selection } from "@tiptap/extensions";
-import { useEditor } from "@tiptap/react";
-import HorizontalRule from "@tiptap/extension-horizontal-rule";
-import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node";
-import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
-import { authClient } from "@/lib/auth-client";
-import React, { useState } from "react";
-import { DateTimePicker } from "@/components/shared/datetime-picker";
-import {
-  ItemProjectGroupBodyRequest,
-  ItemProjectGroupEntity,
-} from "../../../../types/api/item-project-group";
-import { SelectPriority } from "@/components/shared/select-priority";
-import { SelectAssigned } from "@/components/shared/select-assigned";
-import SheetSideBackground from "../../_components/sheets/sheet-side-background";
-import { toast } from "sonner";
+import { EllipsisVertical, Trash } from "lucide-react";
+import { ItemProjectGroupEntity } from "../../../../types/api/item-project-group";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import UpdateItemProjectSheet from "./sheet/update-item-project";
+import DeleteItemProjectGroupSheet from "./sheet/delete-item-project";
 
 const ItemProject = ({
   data,
@@ -93,11 +43,14 @@ const ItemProject = ({
               />
             </div>
           </DropdownMenuItem>
-          <DropdownMenuItem className=" min-w-full">
-            <span className=" flex flex-row items-center gap-1.5">
-              <Trash size={10} strokeWidth={"3px"} className=" text-red-600" />
-              <p className="  font-semibold">Delete</p>
-            </span>
+
+          <DropdownMenuItem
+            onSelect={(e) => e.preventDefault()}
+            className=" min-w-full"
+          >
+            <div>
+              <DeleteItemProjectGroupSheet id={data.id} />
+            </div>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

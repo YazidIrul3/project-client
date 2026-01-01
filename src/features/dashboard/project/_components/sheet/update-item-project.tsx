@@ -46,7 +46,6 @@ import {
 } from "@/types/api/item-project-group";
 import SheetSideBackground from "@/features/dashboard/_components/sheets/sheet-side-background";
 import { useUpdateItemProjectGroup } from "@/features/api/itemProject/update-itemProject";
-import { email } from "zod";
 
 type AssignedType = {
   assigned: {
