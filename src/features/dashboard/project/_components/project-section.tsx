@@ -1,10 +1,10 @@
 import { useGetProject } from "@/features/api/project/get-project";
 import DashbaordLayout from "../../_components/layout";
 import { authClient } from "@/lib/auth-client";
-import { ItemProjectGroupEntity } from "@/types/api/project-group";
 import { ItemProjectEntity } from "@/types/api/project";
 import { Button } from "@/components/ui/button";
-import ProjectKanbanView from "./view/project-kanban";
+import { ItemProjectGroupEntity } from "@/types/api/item-project-group";
+import { ProjectKanbanView } from "./view/kanban/project-kanban";
 
 type ProjectSectionHeaderProps = {
   data?: ItemProjectEntity;

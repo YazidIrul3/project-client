@@ -37,7 +37,7 @@ const DeleteWorkspaceSheet = () => {
     });
   const { setCurrentWorkspace } = useCurrentWorkspace();
   const { mutate: deleteWorkspaceMutation } = useDeleteWorkspace({
-    token: session?.session.token!,
+    token: session?.session.token as string,
     id: workspace?.id,
     mutationConfig: {
       onSuccess: () => {

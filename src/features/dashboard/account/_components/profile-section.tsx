@@ -23,7 +23,6 @@ import { useUpdateUser } from "@/features/api/user/update-user";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { updateUserSchema, UpdateUserSchema } from "@/features/schema/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
@@ -37,13 +36,13 @@ import {
 } from "@/components/ui/select";
 import { authClient } from "@/lib/auth-client";
 import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
+import { updateUserSchema, UpdateUserSchema } from "@/features/schema/user";
 
 export const ProfileSection = () => {
   const [nameInputValue, setNameInputValue] = useState<string>("");
   const { data: profile, isLoading: fetchProfileLoading } = useGetProfile(
     authClient.useSession().data?.session.token
   );
-  const { setCurrentWorkspace } = useCurrentWorkspace();
   const { mutate: updateUserMutation, isPending: updateUserLoading } =
     useUpdateUser({
       mutationConfig: {

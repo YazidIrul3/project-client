@@ -3,17 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react";
 
-// --- Tiptap Core Extensions ---
-import { StarterKit } from "@tiptap/starter-kit";
-import { Image } from "@tiptap/extension-image";
-import { TaskItem, TaskList } from "@tiptap/extension-list";
-import { TextAlign } from "@tiptap/extension-text-align";
-import { Typography } from "@tiptap/extension-typography";
-import { Highlight } from "@tiptap/extension-highlight";
-import { Subscript } from "@tiptap/extension-subscript";
-import { Superscript } from "@tiptap/extension-superscript";
-import { Selection } from "@tiptap/extensions";
-
 // --- UI Primitives ---
 import { Button } from "@/components/tiptap-ui-primitive/button";
 import { Spacer } from "@/components/tiptap-ui-primitive/spacer";
@@ -183,52 +172,13 @@ const MobileToolbarContent = ({
   </div>
 );
 
-export function SimpleEditor() {
+export function SimpleEditor({ editor }: { editor: any }) {
   const isMobile = useIsBreakpoint();
   const { height } = useWindowSize();
   const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
     "main"
   );
   const toolbarRef = useRef<HTMLDivElement>(null);
-
-  const editor = useEditor({
-    immediatelyRender: false,
-    editorProps: {
-      attributes: {
-        autocomplete: "off",
-        autocorrect: "off",
-        autocapitalize: "off",
-        "aria-label": "Main content area, start typing to enter text.",
-        class: "simple-editor",
-      },
-    },
-    extensions: [
-      StarterKit.configure({
-        horizontalRule: false,
-        link: {
-          openOnClick: false,
-          enableClickSelection: true,
-        },
-      }),
-      HorizontalRule,
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-      TaskList,
-      TaskItem.configure({ nested: true }),
-      Highlight.configure({ multicolor: true }),
-      Image,
-      Typography,
-      Superscript,
-      Subscript,
-      Selection,
-      ImageUploadNode.configure({
-        accept: "image/*",
-        maxSize: MAX_FILE_SIZE,
-        limit: 3,
-        upload: handleImageUpload,
-        onError: (error) => console.error("Upload failed:", error),
-      }),
-    ],
-  });
 
   const rect = useCursorVisibility({
     editor,
@@ -241,14 +191,12 @@ export function SimpleEditor() {
     }
   }, [isMobile, mobileView]);
 
-  editor?.getJSON();
-  
   return (
-    <div className="simple-editor-wrapper">
+    <div className="simple-editor-wrapper mt-3">
       <EditorContext.Provider value={{ editor }}>
         <Toolbar
           ref={toolbarRef}
-          className=" h-[120px] mt-4 flex justify-start lg:max-w-4xl md:max-w-sm sm:max-w-lg max-w-sm"
+          className="  flex justify-start lg:max-w-4xl md:max-w-sm sm:max-w-lg max-w-sm "
           style={{
             ...(isMobile
               ? {
@@ -271,7 +219,12 @@ export function SimpleEditor() {
           )}
         </Toolbar>
 
-        <EditorContent editor={editor} role="presentation" className=" px-3" />
+        <EditorContent
+          editor={editor}
+          role="presentation"
+          placeholder="Type your content"
+          className=" "
+        />
       </EditorContext.Provider>
     </div>
   );

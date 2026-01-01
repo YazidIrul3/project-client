@@ -1,6 +1,6 @@
 import { Entity } from "./api";
 
-export type ItemProjectGroupEntity = Entity<{
+export type ProjectGroupEntity = Entity<{
   id: string;
   name: string;
   color: string;

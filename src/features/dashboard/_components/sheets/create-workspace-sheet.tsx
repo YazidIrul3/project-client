@@ -87,19 +87,20 @@ const CreateWorkspaceSheet = () => {
   };
 
   const handleOnSubmit = () => {
-    setBodyRequest({
-      name: "",
-      avatar: "",
-      timezone: "",
-      userId: "",
-      workspaceTypeName: "team",
-    });
     createWorkspaceMutation({
       avatar: "Tes",
       name: bodyRequest.name,
       workspaceTypeName: bodyRequest.workspaceTypeName,
       timezone: bodyRequest.timezone,
       userId: data?.user?.id!,
+    });
+
+    setBodyRequest({
+      name: "",
+      avatar: "",
+      timezone: "",
+      userId: "",
+      workspaceTypeName: "team",
     });
   };
 

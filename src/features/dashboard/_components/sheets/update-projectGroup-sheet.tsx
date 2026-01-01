@@ -44,14 +44,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ItemProjectGroupEntity,
-  ProjectGroupBodyRequest,
-} from "@/types/api/project-group";
+import { ProjectGroupBodyRequest } from "@/types/api/project-group";
 import { ProjectGroupColors } from "@/helpers/color";
 import { useCreateProjectGroup } from "@/features/api/projectGroup/create-projectGroup";
 import DeleteProjectGroupSheet from "./delete-projectGroup-sheet";
 import { useUpdateProjectGroup } from "@/features/api/projectGroup/update-project";
+import { ItemProjectGroupEntity } from "@/types/api/item-project-group";
 
 type UpdateProjectGroupSheetProps = {
   id: string;
