@@ -6,40 +6,57 @@ import UpdateProjectGroupSheet from "../../../../_components/sheets/update-proje
 import { useGetItemProjectGroupByProjectGroupId } from "@/features/api/itemProject/get-itemProject";
 import { authClient } from "@/lib/auth-client";
 import { ItemProjectGroupEntity } from "@/types/api/item-project-group";
-import { Button } from "@/components/ui/button";
 import ItemProject from "../../item-project";
-import { useState } from "react";
-import { useHover } from "@/hooks/use-hover";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
-type COlumnKanban = {
+type ColumnContainerKanban = {
   data?: ProjectGroupEntity;
 };
 
-const COlumnKanban = (props: COlumnKanban) => {
+const ColumnContainerKanban = (props: ColumnContainerKanban) => {
+  const { data } = props;
   const { data: user } = authClient.useSession();
   const { data: itemProjectGroups } = useGetItemProjectGroupByProjectGroupId({
     token: user?.session.token as string,
-    projectGroupId: props.data?.id as string,
+    projectGroupId: data?.id as string,
   });
 
+  const { setNodeRef, attributes, listeners, transform, transition } =
+    useSortable({
+      id: data?.id as string,
+      data: {
+        type: "Column",
+        data,
+      },
+    });
+
+  const style = {
+    transition,
+    transform: CSS.Transform.toString(transform),
+  };
+
   return (
-    <Card className=" min-w-[300px] min-h-[400px] p-3">
+    <Card
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className=" min-w-[300px] min-h-[400px] p-3"
+    >
       <div className=" flex flex-row items-center justify-between px-2">
         <CardTitle className=" flex flex-row items-center gap-3">
           <div
             style={{
-              backgroundColor: props.data?.color || "gray",
+              backgroundColor: data?.color || "gray",
             }}
             className={`h-[13px] w-[13px] rounded-full `}
           ></div>
-          <h1 className=" font-bold text-sm capitalize">{props.data?.name}</h1>
+          <h1 className=" font-bold text-sm capitalize">{data?.name}</h1>
         </CardTitle>
 
         <div className=" flex flex-row gap-4">
-          <UpdateProjectGroupSheet
-            data={props.data}
-            id={props.data?.id as string}
-          />
+          <UpdateProjectGroupSheet data={data} id={data?.id as string} />
           <SettingsIcon size={20} />
         </div>
       </div>
@@ -57,12 +74,12 @@ const COlumnKanban = (props: COlumnKanban) => {
           }
         )}
         <CreateItemProject
-          borderColor={props.data?.color as string}
-          id={props.data?.id as string}
+          borderColor={data?.color as string}
+          id={data?.id as string}
         />
       </CardContent>
     </Card>
   );
 };
 
-export default COlumnKanban;
+export default ColumnContainerKanban;
