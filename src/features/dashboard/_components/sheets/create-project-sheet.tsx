@@ -34,7 +34,6 @@ import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ProjectBodyRequest } from "@/types/api/project";
-import { useGetWorkspace } from "@/features/api/workspace/get-workspace";
 import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
 import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
 

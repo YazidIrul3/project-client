@@ -174,7 +174,7 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
         style={{
           borderColor: props.borderColor || "gray",
         }}
-        className=" min-w-full border-dashed border-2"
+        className=" min-w-full border-dashed border-2 z-40"
       >
         <Button variant={"ghost"}>
           <Plus />

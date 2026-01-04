@@ -4,7 +4,8 @@
 
 export type BaseEntity = {
   id: string;
-  createdAt: number;
+  updatedAt: Date;
+  createdAt: Date;
 };
 
 export type Entity<T> = {

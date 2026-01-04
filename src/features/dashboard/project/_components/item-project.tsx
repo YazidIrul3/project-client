@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import UpdateItemProjectSheet from "./sheet/update-item-project";
 import DeleteItemProjectGroupSheet from "./sheet/delete-item-project";
+import { CSS } from "@dnd-kit/utilities";
+import { useSortable } from "@dnd-kit/sortable";
 
 const ItemProject = ({
   data,
@@ -18,8 +20,28 @@ const ItemProject = ({
   data: ItemProjectGroupEntity;
   projectGroupId: string;
 }) => {
+  const { setNodeRef, attributes, listeners, transform, transition } =
+    useSortable({
+      id: data?.id as string,
+      data: {
+        type: "Task",
+        data,
+      },
+    });
+
+  const style = {
+    transition,
+    transform: CSS.Transform.toString(transform),
+  };
+
   return (
-    <div className=" min-w-full flex flex-row items-center gap-2 shadow-sm px-2 py-2.5 rounded-md">
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className=" min-w-full flex flex-row items-center gap-2 shadow-sm px-2 py-2.5 rounded-md"
+    >
       <h1 className=" truncate max-w-11/12 min-w-11/12">{data.title}</h1>
 
       <DropdownMenu>
