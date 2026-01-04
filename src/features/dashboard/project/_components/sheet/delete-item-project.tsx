@@ -12,15 +12,16 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form";
-import { useDeleteProjectGroup } from "@/features/api/projectGroup/delete-projectGroup";
+import { useDeleteItemProjectGroup } from "@/features/api/itemProject/delete-itemProject";
+import { Trash } from "lucide-react";
 
-type DeleteProjectGroupSheet = {
+type DeleteItemProjectGroupSheet = {
   id: string;
 };
 
-const DeleteProjectGroupSheet = (props: DeleteProjectGroupSheet) => {
+const DeleteItemProjectGroupSheet = (props: DeleteItemProjectGroupSheet) => {
   const { data: session } = authClient.useSession();
-  const { mutate: deleteProjectGroupMutation } = useDeleteProjectGroup({
+  const { mutate: deleteItemProjectGroupMutation } = useDeleteItemProjectGroup({
     token: session?.session.token as string,
     id: props?.id,
     mutationConfig: {
@@ -35,7 +36,7 @@ const DeleteProjectGroupSheet = (props: DeleteProjectGroupSheet) => {
 
   const handleOnDelete = () => {
     if (session) {
-      deleteProjectGroupMutation({
+      deleteItemProjectGroupMutation({
         token: session?.session.token as string,
         id: props?.id,
       });
@@ -48,18 +49,22 @@ const DeleteProjectGroupSheet = (props: DeleteProjectGroupSheet) => {
         asChild
         className=" min-w-fit justify-start flex font-normal text-sm px-2 py-2"
       >
-        <Button className=" bg-red-600 w-fit font-semibold">Delete</Button>
+        <div className=" flex flex-row items-center gap-1.5">
+          <Trash size={10} strokeWidth={"3px"} className=" text-red-600" />
+          <p className="  font-semibold">Delete</p>
+        </div>
       </SheetTrigger>
+      
       <SheetContent className=" flex flex-row justify-center items-center max-w-[550px]  h-fit translate-x-[-50%] translate-y-[-50%] left-1/2 top-1/2 rounded-xl ">
         <Form {...form}>
           <div className="flex flex-col w-full">
             <SheetHeader>
               <SheetTitle className="text-red-600 font-bold">
-                Delete Project
+                Delete Item Project Group
               </SheetTitle>
               <SheetDescription>
-                Warning! If you delete this project group, all items in project
-                will disapear
+                Warning! If you delete this, that will deletes all data what's
+                have relation with it
               </SheetDescription>
             </SheetHeader>
 
@@ -78,4 +83,4 @@ const DeleteProjectGroupSheet = (props: DeleteProjectGroupSheet) => {
   );
 };
 
-export default DeleteProjectGroupSheet;
+export default DeleteItemProjectGroupSheet;

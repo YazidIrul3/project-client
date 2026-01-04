@@ -1,6 +1,10 @@
 import { ItemProjectGroupEntity } from "@/types/api/item-project-group";
 import CreateProjectGroupSheet from "@/features/dashboard/_components/sheets/create-projectGroup-sheet ";
-import COlumnKanban from "./column-kanban";
+import ColumnContainerKanban from "./column-kanban";
+import { DndContext } from "@dnd-kit/core";
+import { SortableContext } from "@dnd-kit/sortable";
+import { useMemo, useState } from "react";
+import { ProjectGroupEntity } from "@/types/api/project-group";
 
 type ProjectKanbanView = {
   projectId: string;
@@ -8,6 +12,11 @@ type ProjectKanbanView = {
 };
 
 export const ProjectKanbanView = (props: ProjectKanbanView) => {
+  const [columns, setColumns] = useState<ProjectGroupEntity[]>([]);
+  const columnId = useMemo(
+    () => props.projectGroups?.map((group) => group.id) || [],
+    [props.projectGroups]
+  );
   return (
     <div
       className=" flex flex-row gap-3 overflow-x-scroll overflow-y-hidden w-full scrollbar-hide"
@@ -15,9 +24,13 @@ export const ProjectKanbanView = (props: ProjectKanbanView) => {
         scrollbarWidth: "none",
       }}
     >
-      {props.projectGroups?.map((group: any) => (
-        <COlumnKanban key={group.id} data={group} />
-      ))}
+      <DndContext>
+        <SortableContext items={columnId}>
+          {props.projectGroups?.map((group: any) => (
+            <ColumnContainerKanban key={group.id} data={group} />
+          ))}
+        </SortableContext>
+      </DndContext>
 
       <CreateProjectGroupSheet projectId={props.projectId} />
     </div>

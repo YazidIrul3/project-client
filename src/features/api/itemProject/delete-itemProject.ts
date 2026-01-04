@@ -1,15 +1,15 @@
 import { axiosInstance } from "@/lib/axios";
 import { MutationConfig, queryClient } from "@/lib/react-query";
 import { useMutation } from "@tanstack/react-query";
-import { getProjectQuery } from "./create-itemProjectGroup";
+import { getItemProjectGroupQuery } from "./create-itemProjectGroup";
 
-type DeleteProject = {
+type DeleteItemProjectGroup = {
   token: string;
   id: string;
 };
 
-export const deleteProject = async (props: DeleteProject) => {
-  const reponse = await axiosInstance.delete(`/project/${props.id}`, {
+export const deleteItemProjectGroup = async (props: DeleteItemProjectGroup) => {
+  const reponse = await axiosInstance.delete(`/itemProjectGroup/${props.id}`, {
     headers: {
       Authorization: `Bearer ${props.token}`,
     },
@@ -18,26 +18,28 @@ export const deleteProject = async (props: DeleteProject) => {
   return reponse.data;
 };
 
-type UseDeleteProjectParams = {
+type UseDeleteItemProjectGroupParams = {
   token: string;
   id: string;
-  mutationConfig?: MutationConfig<typeof deleteProject>;
+  mutationConfig?: MutationConfig<typeof deleteItemProjectGroup>;
 };
 
-export const useDeleteProject = (params: UseDeleteProjectParams) => {
+export const useDeleteItemProjectGroup = (
+  params: UseDeleteItemProjectGroupParams
+) => {
   return useMutation({
     ...params.mutationConfig,
 
     mutationFn: () => {
       if (!params.token) return Promise.resolve(null);
-      return deleteProject({
+      return deleteItemProjectGroup({
         id: params.id,
         token: params.token,
       });
     },
 
     onSuccess: (data, Variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: getProjectQuery() });
+      queryClient.invalidateQueries({ queryKey: getItemProjectGroupQuery() });
 
       params.mutationConfig?.onSuccess?.(
         data,

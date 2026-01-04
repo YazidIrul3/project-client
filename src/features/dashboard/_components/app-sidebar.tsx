@@ -6,6 +6,7 @@ import {
   CheckCircle,
   ChevronRight,
   ChevronUp,
+  Hash,
   Plus,
   SettingsIcon,
 } from "lucide-react";
@@ -42,13 +43,14 @@ import { WorkspaceEntity } from "@/types/api/workspace";
 import CreateProjectSheet from "./sheets/create-project-sheet";
 import { useRouter } from "next/navigation";
 import UpdateDeleteProjectSheet from "./sheets/update-delete-project-sheet";
+import { ChatChannelEntity } from "@/types/api/chat-channel";
+import CreateChatChanneleSheet from "../chatChannel/_components/sheet/create-chat-chanel";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { onClick } = useLogout();
   const { workspace, setCurrentWorkspace } = useCurrentWorkspace();
   const { data: session } = authClient.useSession();
   const { open } = useSidebar();
-  const router = useRouter();
   const { data: workspaceSidebarData, isLoading: workspaceSidebarDataLoading } =
     useGetWorkspaceSidebar({
       token: session?.session.token as string,
@@ -64,6 +66,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       token: session?.session.token as string,
       userId: workspace.userId,
     });
+
+  const userData = workspaceSidebarData?.workspaceMembers?.filter(
+    (item: any) => item.memberId == workspace.userId
+  );
 
   return (
     <div>
@@ -81,7 +87,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     {open ? (
                       <div className=" flex flex-row items-center gap-3 justify-center py-2">
                         <div className=" bg-red-600 text-slate-50 font-bold text-lg p-3 uppercase flex justify-center items-center rounded-full">
-                          {workspaceSidebarData?.user?.name[0]}
+                          {userData[0]?.member?.name[0]}
                         </div>
 
                         <div className=" flex flex-col">
@@ -91,7 +97,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             </h1>
 
                             <h1 className=" bg-slate-800 text-slate-50 text-xs font-semibold rounded-full px-2 py-0.5 capitalize">
-                              {workspaceSidebarData?.user?.subscription?.name}
+                              {userData[0]?.member?.subscription.name}
                             </h1>
                           </div>
                           <p className=" text-xs">
@@ -124,7 +130,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                               onClick={() => {
                                 setCurrentWorkspace({
                                   name: item?.name,
-                                  userId: item?.user?.id as string,
+                                  userId: session?.user.id as string,
                                 });
 
                                 // router.refresh();
@@ -237,12 +243,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarGroup>
 
             <SidebarGroup className=" mt-4">
-              <h3 className={` text-sm font-semibold mb-2`}>Channels</h3>
+              <div className=" flex items-center justify-between">
+                <h3 className={` text-sm font-semibold mb-2`}>Channels</h3>
+                <CreateChatChanneleSheet />
+              </div>
 
-              <div className=" px-1">
-                <Link href={""} className=" text-sm">
-                  # General
-                </Link>
+              <div className=" px-1 mt-1">
+                {workspaceSidebarData?.chatChannel?.map(
+                  (item: ChatChannelEntity) => {
+                    return (
+                      <Link
+                        key={item.id}
+                        href={`/channel/${item.id}`}
+                        className=" text-sm flex flex-row items-center gap-1"
+                      >
+                        <Hash size={20} strokeWidth={"2px"} />
+                        <h1 className=" text-sm font-semibold">{item.name}</h1>
+                      </Link>
+                    );
+                  }
+                )}
               </div>
             </SidebarGroup>
 
@@ -285,16 +305,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       {open ? (
                         <div className=" flex flex-row items-center h-fit w-full gap-3 justify-between py-2">
                           <div className=" bg-red-600 text-slate-50 font-bold text-lg p-3 flex justify-center items-center rounded-full">
-                            {workspaceSidebarData?.user?.name[0]}
+                            {userData[0]?.member?.name[0]}
                           </div>
 
                           <div className=" flex flex-col">
                             <div className=" flex flex-col justify-between w-full  ">
                               <h1 className=" text-slate-900 text-sm font-bold">
-                                {workspaceSidebarData?.user?.name}
+                                {userData[0]?.member?.name}
                               </h1>
                               <p className=" text-xs">
-                                {workspaceSidebarData?.user?.email}
+                                {userData[0]?.member?.email}
                               </p>
                             </div>
                           </div>

@@ -12,7 +12,6 @@ import AccountLayout from "../_components/account-layout";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -35,7 +34,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { authClient } from "@/lib/auth-client";
-import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
 import { updateUserSchema, UpdateUserSchema } from "@/features/schema/user";
 
 export const ProfileSection = () => {

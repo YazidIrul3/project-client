@@ -110,10 +110,7 @@ const UpdateProjectGroupSheet = (props: UpdateProjectGroupSheetProps) => {
 
   return (
     <Sheet>
-      <SheetTrigger
-        asChild
-        className=" min-w-full justify-start flex font-normal text-sm px-2 py-2"
-      >
+      <SheetTrigger asChild className="text-sm px-2 py-2">
         <div>
           <SettingsIcon size={20} />
         </div>
