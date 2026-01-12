@@ -1,3 +1,4 @@
+import { useAuthenticated } from "@/hooks/use-authenticated";
 import { axiosInstance } from "@/libs/axios";
 import { QueryConfig } from "@/libs/react-query";
 import { queryOptions, useQuery } from "@tanstack/react-query";
@@ -28,7 +29,10 @@ type useGetProject = {
 };
 
 export const useGetProject = (params: useGetProject) => {
+  const { isAuthenticated } = useAuthenticated();
+
   return useQuery({
+    enabled: isAuthenticated,
     ...getProjectQueryOptions(params.id, params.token),
     ...params.queryConfig,
   });

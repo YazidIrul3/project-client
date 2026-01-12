@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { ProjectKanbanView } from "./view/kanban/project-kanban";
 import { ItemProjectGroupEntity } from "@/types/api/item-project-group";
 import { ProjectGroupEntity } from "@/types/api/project-group";
+import { useAuthenticated } from "@/hooks/use-authenticated";
+import { useEffect } from "react";
+import { useLoading } from "@/hooks/use-loading";
 
 type ProjectSectionHeaderProps = {
   data?: ItemProjectGroupEntity;
@@ -48,11 +51,19 @@ const ProjectSectionMain = (props: ProjectSectionMainProps) => {
 
 export const ProjectSection = (props: { projectId: string }) => {
   const { data } = authClient.useSession();
+  const { token } = useAuthenticated();
+  const { setIsLoading } = useLoading();
 
-  const { data: project } = useGetProject({
-    token: data?.session.token as string,
+  const { data: project, isLoading: isProjectLoading } = useGetProject({
+    token: token,
     id: props.projectId,
   });
+
+  useEffect(() => {
+    if (isProjectLoading) setIsLoading(true);
+
+    setIsLoading(false);
+  }, [isProjectLoading]);
 
   return (
     <DashbaordLayout>
