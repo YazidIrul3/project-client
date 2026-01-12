@@ -1,5 +1,5 @@
-import { axiosInstance } from "@/lib/axios";
-import { QueryConfig } from "@/lib/react-query";
+import { axiosInstance } from "@/libs/axios";
+import { QueryConfig } from "@/libs/react-query";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 export const getItemProjectGroupByProjectGroupId = async (

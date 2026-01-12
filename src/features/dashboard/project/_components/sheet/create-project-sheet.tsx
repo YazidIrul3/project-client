@@ -28,19 +28,30 @@ import {
 import { useSidebar } from "@/components/ui/sidebar";
 import { Plus } from "lucide-react";
 import { useForm } from "react-hook-form";
-import SheetSideBackground from "./sheet-side-background";
-import { useCreateProject } from "@/features/api/project/create-project";
-import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
+import {
+  createProjectSchema,
+  CreateProjectSchema,
+  useCreateProject,
+} from "@/features/api/project/create-project";
+import { authClient } from "@/libs/auth-client";
 import { toast } from "sonner";
-import { ProjectBodyRequest } from "@/types/api/project";
 import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
-import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
+import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-workspace";
+import SheetSideBackground from "@/features/dashboard/_components/sheets/sheet-side-background";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useSheet } from "@/hooks/use-sheet";
 
 const CreateProjectSheet = () => {
   const { open } = useSidebar();
-  const form = useForm();
-  const { control } = form;
+  const form = useForm<CreateProjectSchema>({
+    resolver: zodResolver(createProjectSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+      template: "default",
+    },
+  });
+  const { control, getValues } = form;
   const { workspace: currentWorkspace } = useCurrentWorkspace();
   const { data } = authClient.useSession();
   const { data: workspace } = useGetWorkspaceSidebar({
@@ -48,42 +59,25 @@ const CreateProjectSheet = () => {
     userId: currentWorkspace.userId,
     workspaceName: currentWorkspace.name,
   });
-  const [bodyRequest, setBodyRequest] = useState<ProjectBodyRequest>({
-    name: "",
-    template: "default",
-  });
   const { mutate: createProjectMutaion } = useCreateProject({
     token: data?.session.token as string,
     mutationConfig: {
       onSuccess: () => {
-        toast.success("Create project success");
-
         window.location.reload();
+
+        toast.success("Create project success");
       },
     },
   });
 
-  const handleOnChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-
-    setBodyRequest((prev) => {
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
-  };
-
   const handleOnSubmit = () => {
     createProjectMutaion({
-      name: bodyRequest.name,
+      name: getValues("name"),
       workspaceId: workspace?.id,
-      template: bodyRequest.template,
+      template: getValues("template"),
     });
 
-    setBodyRequest({ name: "", template: "default" });
+    form.reset();
   };
 
   return (
@@ -119,14 +113,13 @@ const CreateProjectSheet = () => {
                     <FormLabel className=" mb-2">Project Name</FormLabel>
                     <FormControl>
                       <Input
+                        {...field}
                         placeholder="Type Project name"
                         name="name"
-                        onChange={(e) => {
-                          field.onChange(e);
-                          handleOnChange(e);
-                        }}
                       />
                     </FormControl>
+
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -138,16 +131,7 @@ const CreateProjectSheet = () => {
                   <FormItem>
                     <FormLabel>Template Project</FormLabel>
                     <FormControl className=" lg:w-9/12 w-full">
-                      <Select
-                        name="template"
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          handleOnChange({
-                            target: { name: "template", value },
-                          } as any);
-                        }}
-                        defaultValue="default"
-                      >
+                      <Select {...field} name="template" defaultValue="default">
                         <SelectTrigger value={"tes"}>
                           <SelectValue placeholder="Select a template" />
                         </SelectTrigger>

@@ -1,6 +1,5 @@
 "use client";
 
-import withAuthUser from "@/utils/withAuthUser";
 import DashbaordLayout from "../../_components/layout";
 import { ChatChannelSection } from "../_components/channel-section";
 import { useParams } from "next/navigation";
@@ -15,4 +14,4 @@ const ChatChannelPage = () => {
   );
 };
 
-export default withAuthUser(ChatChannelPage);
+export default ChatChannelPage;

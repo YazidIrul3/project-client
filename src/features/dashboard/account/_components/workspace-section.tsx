@@ -21,9 +21,9 @@ import {
 import { useForm } from "react-hook-form";
 import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
 import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/libs/auth-client";
 import { Input } from "@/components/ui/input";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import {
   Select,
@@ -33,35 +33,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { WorkspaceupdateEntity } from "@/types/api/workspace";
-import { useUpdatWorkspace } from "@/features/api/workspace/update-workspace";
+import {
+  WorkspaceSidebarEntity,
+  WorkspaceupdateEntity,
+} from "@/types/api/workspace";
+import {
+  updatWorkspaceSchema,
+  UpdatWorkspaceSchema,
+  useUpdatWorkspace,
+} from "@/features/api/workspace/update-workspace";
 import DeleteWorkspaceSheet from "../../_components/sheets/delete-workspace-sheet";
 import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useLoading } from "@/hooks/use-loading";
+import { useAuthenticated } from "@/hooks/use-authenticated";
+import { set } from "zod";
 
-export const WorkspaceOverview = () => {
-  const form = useForm();
-  const { control } = form;
+export const WorkspaceForm = ({
+  workspaceSidebarData,
+}: {
+  workspaceSidebarData: WorkspaceSidebarEntity;
+}) => {
   const { workspace: currentWorkspace } = useCurrentWorkspace();
   const { data: session } = authClient.useSession();
-  const { data: workspace, isLoading: workspaceSidebarDataLoading } =
-    useGetWorkspaceSidebar({
-      token: session?.session.token as string,
-      userId: currentWorkspace.userId as string,
-      workspaceName: currentWorkspace.name as string,
-      queryConfig: {
-        enabled:
-          !!session?.session.token &&
-          !!currentWorkspace.userId &&
-          !!currentWorkspace.name,
-      },
-    });
-  const [bodyRequest, setBodyRequest] = useState<WorkspaceupdateEntity>({
-    name: workspace?.name,
-    avatar: "",
-    timezone: workspace?.timezone,
+  const { setIsLoading, isLoading } = useLoading();
+  const form = useForm<UpdatWorkspaceSchema>({
+    resolver: zodResolver(updatWorkspaceSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: workspaceSidebarData?.name,
+      timezone:
+        workspaceSidebarData?.timezone != "tes"
+          ? workspaceSidebarData?.timezone
+          : "est",
+    },
   });
+  const { control, getValues } = form;
   const { mutate: updateWorkspaceMutation } = useUpdatWorkspace({
-    id: workspace?.id,
+    id: workspaceSidebarData?.id,
     token: session?.session.token as string,
     mutationConfig: {
       onSuccess: () => {
@@ -70,29 +79,10 @@ export const WorkspaceOverview = () => {
     },
   });
 
-  const handleOnChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-
-    setBodyRequest((prev) => {
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
-  };
-
   const handleOnSubmit = () => {
     updateWorkspaceMutation({
-      name: bodyRequest?.name as string,
-      timezone: "",
-    });
-
-    setBodyRequest({
-      name: workspace?.name,
-      avatar: "",
-      timezone: workspace?.timezone,
+      name: getValues("name"),
+      timezone: getValues("timezone"),
     });
   };
 
@@ -106,7 +96,7 @@ export const WorkspaceOverview = () => {
         <CardContent className="flex flex-col gap-3">
           <h4 className=" font-semibold">Avatar</h4>
           <div className=" bg-red-600 uppercase text-slate-50 font-bold w-fit text-2xl px-5 py-3 flex justify-center items-center rounded-xl">
-            {workspace?.name[0]}
+            {workspaceSidebarData?.name[0]}
           </div>
 
           <FormField
@@ -116,12 +106,7 @@ export const WorkspaceOverview = () => {
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl className=" lg:w-9/12 w-full">
-                  <Input
-                    {...field}
-                    placeholder="Type Workspace name"
-                    value={bodyRequest?.name}
-                    onChange={(e) => handleOnChange(e)}
-                  />
+                  <Input {...field} placeholder="Type Workspace name" />
                 </FormControl>
 
                 <FormMessage />
@@ -135,16 +120,7 @@ export const WorkspaceOverview = () => {
               <FormItem>
                 <FormLabel className=" mb-2">Timezone</FormLabel>
                 <FormControl className=" lg:w-9/12 w-full">
-                  <Select
-                    defaultValue={bodyRequest?.timezone}
-                    name="timezone"
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      handleOnChange({
-                        target: { name: "timezone", value },
-                      } as any);
-                    }}
-                  >
+                  <Select {...field} name="timezone">
                     <SelectTrigger value={"tes"}>
                       <SelectValue placeholder="Select a timezone" />
                     </SelectTrigger>
@@ -161,7 +137,7 @@ export const WorkspaceOverview = () => {
             )}
           />
 
-          {bodyRequest?.name == workspace?.name ? (
+          {getValues("name") == workspaceSidebarData?.name ? (
             <Button className=" w-fit" type="button" disabled>
               Save
             </Button>
@@ -176,16 +152,11 @@ export const WorkspaceOverview = () => {
   );
 };
 
-export const WorkspaceDeleteView = () => {
-  const { workspace: currentWorkspace } = useCurrentWorkspace();
-  const { data: session } = authClient.useSession();
-  const { data: workspace, isLoading: workspaceSidebarDataLoading } =
-    useGetWorkspaceSidebar({
-      token: session?.session.token!,
-      userId: currentWorkspace.userId,
-      workspaceName: currentWorkspace.name,
-    });
-
+export const WorkspaceDeleteView = ({
+  workspaceSidebarData,
+}: {
+  workspaceSidebarData: WorkspaceSidebarEntity;
+}) => {
   return (
     <Card className=" bg-red-50 shadow-red-600 shadow-xs pb-4">
       <CardHeader>
@@ -198,10 +169,10 @@ export const WorkspaceDeleteView = () => {
         </CardDescription>
       </CardHeader>
 
-      {workspace?.workspaceType?.name == "personal" && (
+      {workspaceSidebarData?.workspaceType?.name == "personal" && (
         <CardContent>
           <h1 className=" bg-red-100 rounded-lg w-full container mx-auto p-3 text-sm text-red-600">
-            Personal's Workspace is not available to delete
+            Personal is Workspace is not available to delete
           </h1>
         </CardContent>
       )}
@@ -215,27 +186,33 @@ export const WorkspaceDeleteView = () => {
 
 export const WorkspaceSection = () => {
   const { workspace: currentWorkspace } = useCurrentWorkspace();
-  const { data: session } = authClient.useSession();
-  const { data: workspace, isLoading: workspaceSidebarDataLoading } =
+  const { setIsLoading } = useLoading();
+  // const { data: session } = authClient.useSession();
+  const { token } = useAuthenticated();
+  const { data: workspaceSidebarData, isLoading: workspaceSidebarDataLoading } =
     useGetWorkspaceSidebar({
-      token: session?.session.token as string,
+      token: token as string,
       userId: currentWorkspace.userId,
       workspaceName: currentWorkspace.name,
-      queryConfig: {
-        enabled: !!session?.session.token,
-      },
     });
+
+  useEffect(() => {
+    if (workspaceSidebarDataLoading) {
+      setIsLoading(true);
+    }
+
+    setIsLoading(false);
+  }, [workspaceSidebarDataLoading]);
 
   return (
     <section>
-      {workspaceSidebarDataLoading && <Spinner />}
       <AccountLayout>
         <div className=" flex flex-col gap-3 pb-4">
           {/* overview card */}
-          <WorkspaceOverview />
+          <WorkspaceForm workspaceSidebarData={workspaceSidebarData} />
 
           {/* delete card*/}
-          <WorkspaceDeleteView />
+          <WorkspaceDeleteView workspaceSidebarData={workspaceSidebarData} />
         </div>
       </AccountLayout>
     </section>

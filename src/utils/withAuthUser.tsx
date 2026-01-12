@@ -1,59 +1,87 @@
+"use client";
+
 import { Spinner } from "@/components/ui/spinner";
 import { useCreateWorkspace } from "@/features/api/workspace/create-workspace";
 import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-workspace";
-import { authClient } from "@/lib/auth-client";
+import { useAuthenticated } from "@/hooks/use-authenticated";
+import { authClient } from "@/libs/auth-client";
 import { useRouter } from "next/navigation";
-import { ComponentType, useEffect } from "react";
-
-type WithAuthOptions = {
-  redirectUrl?: string;
-};
+import { ComponentType, useEffect, useRef } from "react";
 
 const withAuthUser = (OriginalComponent: ComponentType) => {
-  return (props: WithAuthOptions = {}) => {
-    const { redirectUrl, ...restProps } = props;
-    const { data, isRefetching, isPending } = authClient.useSession();
-    const { setCurrentWorkspace, workspace: currentWorkspace } =
-      useCurrentWorkspace();
+  return function WithAuth(props: { redirectUrl?: string }) {
+    const { redirectUrl = "/login", ...rest } = props;
+
+    const { data, isPending, isRefetching } = authClient.useSession();
+    const isSessionLoading = isPending || isRefetching;
+    const { onLogin } = useAuthenticated();
+    const { workspace, setCurrentWorkspace } = useCurrentWorkspace();
     const router = useRouter();
-    const {
-      mutate: createWorkspaceMutation,
-      isPending: createWorkspaceLoading,
-    } = useCreateWorkspace({
-      token: data?.session.token,
-    });
+
+    const { mutate: createWorkspace, isPending: isCreatingWorkspace } =
+      useCreateWorkspace({
+        token: data?.session?.token,
+      });
+
+    // 🔒 KUNCI: pastikan effect hanya jalan sekali
+    const hasInitialized = useRef(false);
 
     useEffect(() => {
-      if (data?.session.token) {
-        createWorkspaceMutation({
-          avatar: "tes",
-          name: `${data?.user.name}'s Space`,
-          timezone: "tes",
-          userId: `${data?.user.id}`,
-          workspaceTypeName: "personal",
-        });
+      if (hasInitialized.current) return;
 
-        if (
-          currentWorkspace.name == `undefined's Space` ||
-          currentWorkspace.name == `${data?.user.name}'s Space`
-        ) {
-          setCurrentWorkspace({
-            name: `${data?.user.name}'s Space`,
-            userId: data?.user.id as string,
-          });
-        }
+      // ⛔ tunggu session selesai
+      if (isSessionLoading) return;
 
-        router.push("");
-      } else {
-        router.push("/login");
+      // ❌ tidak login
+      if (!data?.session?.token) {
+        hasInitialized.current = true;
+        router.replace(redirectUrl);
+        return;
       }
-    }, [isPending && isRefetching && data?.session.token]);
 
-    if (isPending || createWorkspaceLoading || isRefetching) {
+      // ✅ workspace sudah ada
+      if (
+        workspace?.name == undefined ||
+        workspace?.name === "" ||
+        workspace?.name === null
+      ) {
+        hasInitialized.current = true;
+        return;
+      }
+
+      const workspaceName = `${data.user.name}'s Space`;
+
+      onLogin(
+        data?.session.token as string,
+        {
+          id: data?.user.id as string,
+          email: data?.user.email as string,
+          name: data?.user.name as string,
+        },
+        data?.session.expiresAt as Date
+      );
+
+      createWorkspace({
+        avatar: "tes",
+        name: workspaceName,
+        timezone: "tes",
+        userId: data.user.id,
+        workspaceTypeName: "personal",
+      });
+
+      setCurrentWorkspace({
+        name: workspaceName,
+        userId: data.user.id,
+      });
+
+      hasInitialized.current = true;
+    }, [isSessionLoading, data?.session?.token, workspace?.name, redirectUrl]);
+
+    if (isSessionLoading || isCreatingWorkspace) {
       return <Spinner />;
     }
 
-    return <OriginalComponent {...restProps} />;
+    return <OriginalComponent {...rest} />;
   };
 };
 

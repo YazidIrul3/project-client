@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { Hash, Pin, UserRound, UsersRoundIcon } from "lucide-react";
 import { ChatCard } from "./chat-card";
@@ -16,7 +16,6 @@ export const ChatChannelHeader = () => {
       <div className=" text-slate-900 flex flex-row items-center gap-4">
         <UsersRoundIcon size={20} strokeWidth={"3px"} />
         <Pin size={20} strokeWidth={"3px"} />
-        
       </div>
     </header>
   );

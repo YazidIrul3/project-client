@@ -1,5 +1,6 @@
-import { axiosInstance } from "@/lib/axios";
-import { QueryConfig } from "@/lib/react-query";
+import { useAuthenticated } from "@/hooks/use-authenticated";
+import { axiosInstance } from "@/libs/axios";
+import { QueryConfig } from "@/libs/react-query";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 export const getWorkspace = async (id: string, token: string) => {
@@ -28,7 +29,10 @@ type useGetWorkspace = {
 };
 
 export const useGetWorkspace = (params: useGetWorkspace) => {
+  const { isAuthenticated } = useAuthenticated();
+
   return useQuery({
+    enabled: isAuthenticated,
     ...getWorkspaceQueryOptions(params.id, params.token),
     ...params.queryConfig,
   });

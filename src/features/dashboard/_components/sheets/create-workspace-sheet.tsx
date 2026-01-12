@@ -10,7 +10,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -29,30 +28,33 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import {
-  createWorkspace,
+  createWorkspaceInputSchema,
+  CreateWorkspaceInputSchema,
   useCreateWorkspace,
 } from "@/features/api/workspace/create-workspace";
-import {
-  CreateWorkspaceSchema,
-  createWorkspaceSchema,
-} from "@/features/schema/workspace";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/libs/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
-import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import SheetSideBackground from "./sheet-side-background";
-import { useRouter } from "next/navigation";
 import { useSheet } from "@/hooks/use-sheet";
+import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
 
 const CreateWorkspaceSheet = () => {
   const { data } = authClient.useSession();
-  const router = useRouter();
   const token = data?.session.token;
-  const form = useForm<CreateWorkspaceSchema>({
-    resolver: zodResolver(createWorkspaceSchema),
+  const { workspace: currentWorkspace } = useCurrentWorkspace();
+  const form = useForm<CreateWorkspaceInputSchema>({
+    resolver: zodResolver(createWorkspaceInputSchema),
     mode: "onChange",
+    defaultValues: {
+      avatar: "",
+      name: "",
+      timezone: "",
+      workspaceTypeName: currentWorkspace.name,
+      userId: currentWorkspace.userId,
+    },
   });
   const { mutate: createWorkspaceMutation } = useCreateWorkspace({
     token,
@@ -63,46 +65,20 @@ const CreateWorkspaceSheet = () => {
       },
     },
   });
-  const [bodyRequest, setBodyRequest] = useState<CreateWorkspaceSchema>({
-    name: "",
-    avatar: "",
-    timezone: "",
-    userId: "",
-    workspaceTypeName: "team",
-  });
-  const { control } = form;
+  const { control, getValues } = form;
   const { open, openSheet, setOpen, closeSheet } = useSheet();
-
-  const handleOnChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { value, name } = e.target;
-
-    setBodyRequest((prev) => {
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
-  };
 
   const handleOnSubmit = () => {
     createWorkspaceMutation({
       avatar: "Tes",
-      name: bodyRequest.name,
-      workspaceTypeName: bodyRequest.workspaceTypeName,
-      timezone: bodyRequest.timezone,
-      userId: data?.user?.id!,
-    });
-
-    setBodyRequest({
-      name: "",
-      avatar: "",
-      timezone: "",
-      userId: "",
-      workspaceTypeName: "team",
+      name: getValues("name"),
+      workspaceTypeName: getValues("workspaceTypeName"),
+      timezone: getValues("timezone"),
+      userId: getValues("userId"),
     });
   };
+
+  console.log(currentWorkspace);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -140,14 +116,13 @@ const CreateWorkspaceSheet = () => {
                     <FormLabel className=" mb-2">Name</FormLabel>
                     <FormControl>
                       <Input
+                        {...field}
                         placeholder="Type workspace name"
                         name="name"
-                        onChange={(e) => {
-                          field.onChange(e);
-                          handleOnChange(e);
-                        }}
                       />
                     </FormControl>
+
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -160,14 +135,9 @@ const CreateWorkspaceSheet = () => {
                     <FormLabel className=" mb-2">Workspace Type</FormLabel>
                     <FormControl className=" lg:w-9/12 w-full">
                       <Select
+                        {...field}
                         defaultValue="Team"
                         name="workspaceTypeName"
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          handleOnChange({
-                            target: { name: "workspaceTypeName", value },
-                          } as any);
-                        }}
                       >
                         <SelectTrigger>
                           <SelectValue
@@ -199,15 +169,7 @@ const CreateWorkspaceSheet = () => {
                   <FormItem>
                     <FormLabel className=" mb-2">Timezone</FormLabel>
                     <FormControl className=" lg:w-9/12 w-full">
-                      <Select
-                        name="timezone"
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          handleOnChange({
-                            target: { name: "timezone", value },
-                          } as any);
-                        }}
-                      >
+                      <Select {...field} name="timezone">
                         <SelectTrigger value={"tes"}>
                           <SelectValue placeholder="Select a timezone" />
                         </SelectTrigger>

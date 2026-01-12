@@ -8,7 +8,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/libs/auth-client";
 import { useRouter } from "next/navigation";
 import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
 import { useDeleteWorkspace } from "@/features/api/workspace/delete-workspace";
@@ -32,8 +32,8 @@ const DeleteWorkspaceSheet = () => {
   const { data: workspace, isLoading: workspaceSidebarDataLoading } =
     useGetWorkspaceSidebar({
       token: session?.session.token as string,
-      userId: currentWorkspace.userId,
-      workspaceName: currentWorkspace.name,
+      userId: currentWorkspace?.userId,
+      workspaceName: currentWorkspace?.name,
     });
   const { setCurrentWorkspace } = useCurrentWorkspace();
   const { mutate: deleteWorkspaceMutation } = useDeleteWorkspace({
@@ -59,11 +59,9 @@ const DeleteWorkspaceSheet = () => {
       });
 
       setCurrentWorkspace({
-        userId: session?.user.id,
-        name: `${session?.user.name}'s Space`,
+        userId: session?.user?.id,
+        name: `${session?.user?.name}'s Space`,
       });
-
-      //   router.refresh();
     }
   };
 
@@ -102,7 +100,7 @@ const DeleteWorkspaceSheet = () => {
                   <FormItem>
                     <FormLabel className=" mb-2 text-wrap flex flex-wrap">
                       Type
-                      <span className=" font-bold ">"{workspace.name}"</span>
+                      <span className=" font-bold ">{`"${workspace?.name}"`}</span>
                       to confirm
                     </FormLabel>
                     <FormControl>

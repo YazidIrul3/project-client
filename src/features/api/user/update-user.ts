@@ -1,18 +1,18 @@
-import { axiosInstance } from "@/lib/axios";
-import { MutationConfig } from "@/lib/react-query";
+import { axiosInstance } from "@/libs/axios";
+import { MutationConfig } from "@/libs/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import z, { string } from "zod";
 
-const updateUserInputSchema = z.object({
+export const updateUserSchema = z.object({
   name: z.string().min(1, "Name is required"),
   number_phone: z.string().min(9, "Number phone need to have 9 digits or more"),
   timezone: z.string("Timezone must be string"),
 });
 
-export type UpdateUserInput = z.infer<typeof updateUserInputSchema>;
+export type UpdateUserSchema = z.infer<typeof updateUserSchema>;
 
 export const updateUser = async (
-  data: UpdateUserInput,
+  data: UpdateUserSchema,
   id: string,
   token: string
 ) => {
@@ -44,7 +44,7 @@ export const useUpdateUser = (params: UseUpdateUserOptions) => {
       onSuccess?.(data, ...args);
     },
     ...restConfig,
-    mutationFn: (body: UpdateUserInput) => {
+    mutationFn: (body: UpdateUserSchema) => {
       if (!params.token) return Promise.resolve(null);
       return updateUser(body, params.id, params.token);
     },

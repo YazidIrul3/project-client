@@ -1,4 +1,5 @@
 import { Entity } from "./api";
+import { SusbcriptionEntity } from "./subscription";
 
 export type UserEntity = Entity<{
   email: string;
@@ -9,4 +10,5 @@ export type UserEntity = Entity<{
   number_phone: string;
   subscriptionId: string;
   timezone: string;
+  subscription: SusbcriptionEntity;
 }>;

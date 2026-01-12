@@ -1,11 +1,11 @@
-import { axiosInstance } from "@/lib/axios";
-import { MutationConfig, queryClient } from "@/lib/react-query";
+import { axiosInstance } from "@/libs/axios";
+import { MutationConfig, queryClient } from "@/libs/react-query";
 import { useMutation } from "@tanstack/react-query";
 import z from "zod";
 import { getWorkpacesQuery } from "./get-workspaces";
 import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-workspace";
 
-const createWorkspaceInputSchema = z.object({
+export const createWorkspaceInputSchema = z.object({
   name: z.string().min(1, "Name is required"),
   userId: z.string().min(9, "Number phone need to have 9 digits or more"),
   timezone: z.string("Timezone must be string"),
@@ -40,8 +40,6 @@ type useCreateWorkspaceParams = {
 };
 
 export const useCreateWorkspace = (params: useCreateWorkspaceParams) => {
-  const { setCurrentWorkspace } = useCurrentWorkspace();
-
   return useMutation({
     ...params.mutationConfig,
 

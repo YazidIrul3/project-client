@@ -1,13 +1,12 @@
-import { axiosInstance } from "@/lib/axios";
-import { MutationConfig } from "@/lib/react-query";
+import { axiosInstance } from "@/libs/axios";
+import { MutationConfig } from "@/libs/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import z, { string } from "zod";
-import { User } from "better-auth";
+import z from "zod";
 import { getProjectGroupQuery } from "./create-projectGroup";
 
-const updateProjectGroupSchema = z.object({
+export const updateProjectGroupSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  color: z.string("Color must be string"),
+  color: z.string("Color must be string").min(1, "Color is required"),
 });
 
 export type UpdateProjectGroupSchema = z.infer<typeof updateProjectGroupSchema>;

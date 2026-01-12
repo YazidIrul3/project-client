@@ -1,15 +1,15 @@
-import { axiosInstance } from "@/lib/axios";
-import { MutationConfig, queryClient } from "@/lib/react-query";
+import { axiosInstance } from "@/libs/axios";
+import { MutationConfig, queryClient } from "@/libs/react-query";
 import { useMutation } from "@tanstack/react-query";
 import z from "zod";
 
-const createProjectSchema = z.object({
-  name: z.string(),
+export const createProjectSchema = z.object({
+  name: z.string().min(1, "Name is required"),
   workspaceId: z.string(),
-  template: z.string(),
+  template: z.string().min(1, "Template is required"),
 });
 
-type CreateProjectSchema = z.infer<typeof createProjectSchema>;
+export type CreateProjectSchema = z.infer<typeof createProjectSchema>;
 
 export const createProject = async (
   body: CreateProjectSchema,

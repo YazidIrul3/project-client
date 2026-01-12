@@ -29,7 +29,10 @@ export const ChatCard = ({ data }: { data?: ChatEntity }) => {
             <div className=" flex flex-row items-center justify-start gap-2 font-semibold">
               <h1 className=" text-slate-700">
                 Everyone welcome
-                <span className=" font-bold text-slate-900"> Yazid Khairul</span>
+                <span className=" font-bold text-slate-900">
+                  {" "}
+                  Yazid Khairul
+                </span>
               </h1>
               <h3 className=" text-gray-500 text-sm">13/12/2025 05.42</h3>
             </div>

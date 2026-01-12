@@ -1,11 +1,11 @@
-import { axiosInstance } from "@/lib/axios";
-import { MutationConfig } from "@/lib/react-query";
+import { axiosInstance } from "@/libs/axios";
+import { MutationConfig } from "@/libs/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import z, { object, string } from "zod";
 import { User } from "better-auth";
 import { getItemProjectGroupQuery } from "./create-itemProjectGroup";
 
-const updateItemProjectGroupSchema = z.object({
+export const updateItemProjectGroupSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   projectGroupId: z.uuid().min(1, "Project group is required"),
@@ -14,7 +14,13 @@ const updateItemProjectGroupSchema = z.object({
   startTime: z.string(),
   endTime: z.string(),
   priority: z.string().min(1, "Priority is required"),
-  assignedUsers: z.array(object()),
+  assignedUsers: z.array(
+    object({
+      name: z.string().min(1, "Name is required"),
+      id: z.string().min(1, "ID is required"),
+      email: z.string().email("Email is invalid"),
+    })
+  ),
 });
 
 export type UpdateItemProjectGroupSchema = z.infer<
@@ -65,6 +71,5 @@ export const useUpdateItemProjectGroup = (
         context
       );
     },
-    
   });
 };

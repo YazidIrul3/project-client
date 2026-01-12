@@ -33,26 +33,29 @@ import { Selection } from "@tiptap/extensions";
 import { useEditor } from "@tiptap/react";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node";
-import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
-import { authClient } from "@/lib/auth-client";
+import { handleImageUpload, MAX_FILE_SIZE } from "@/libs/tiptap-utils";
+import { authClient } from "@/libs/auth-client";
 import React, { useEffect, useState } from "react";
 import { DateTimePicker } from "@/components/shared/datetime-picker";
 import { SelectPriority } from "@/components/shared/select-priority";
 import { SelectAssigned } from "@/components/shared/select-assigned";
 import { toast } from "sonner";
-import {
-  ItemProjectGroupBodyRequest,
-  ItemProjectGroupEntity,
-} from "@/types/api/item-project-group";
+import { ItemProjectGroupEntity } from "@/types/api/item-project-group";
 import SheetSideBackground from "@/features/dashboard/_components/sheets/sheet-side-background";
-import { useUpdateItemProjectGroup } from "@/features/api/itemProject/update-itemProject";
+import {
+  updateItemProjectGroupSchema,
+  UpdateItemProjectGroupSchema,
+  useUpdateItemProjectGroup,
+} from "@/features/api/itemProject/update-itemProject";
+import { zodResolver } from "@hookform/resolvers/zod";
 
+type UpdateItemProjectGroupUserResponse = {
+  email: string;
+  id: string;
+  name: string;
+};
 type AssignedType = {
-  assigned: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  assigned: UpdateItemProjectGroupUserResponse;
 };
 
 const UpdateItemProjectSheet = ({
@@ -62,26 +65,7 @@ const UpdateItemProjectSheet = ({
   data: ItemProjectGroupEntity;
   projectGroupId: string;
 }) => {
-  const form = useForm();
   const { data: user } = authClient.useSession();
-  const [bodyRequest, setBodyRequest] = useState<ItemProjectGroupBodyRequest>({
-    title: data?.title,
-    description: data.description,
-    projectGroupId: projectGroupId,
-    startDate: data.startDate,
-    endDate: data.endDate,
-    startTime: data.startDate.toString().split("T")[1],
-    endTime: data.endDate.toString().split("T")[1],
-    priority: data.priority,
-    assignedUsers: data.assignedUsers.map((item: AssignedType | any) => {
-      return {
-        id: item.assigned.id,
-        email: item.assigned.email,
-        name: item.assigned.name,
-      };
-    }) as any,
-  });
-
   const editor = useEditor({
     immediatelyRender: false,
     editorProps: {
@@ -120,7 +104,28 @@ const UpdateItemProjectSheet = ({
       }),
     ],
   });
-  const { formState, control, handleSubmit } = form;
+  const form = useForm<UpdateItemProjectGroupSchema>({
+    resolver: zodResolver(updateItemProjectGroupSchema),
+    mode: "onChange",
+    defaultValues: {
+      title: data.title,
+      description: data.description,
+      projectGroupId: projectGroupId,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      startTime: data.startDate.toString().split("T")[1],
+      endTime: data.endDate.toString().split("T")[1],
+      priority: data.priority,
+      assignedUsers: data.assignedUsers.map((item: AssignedType) => {
+        return {
+          id: item.assigned.id,
+          name: item.assigned.name,
+          email: item.assigned.email,
+        };
+      }),
+    },
+  });
+  const { control, getValues } = form;
   const { mutate: UpdateItemProjectMutate } = useUpdateItemProjectGroup({
     id: data.id,
     token: user?.session.token as string,
@@ -133,48 +138,17 @@ const UpdateItemProjectSheet = ({
     },
   });
 
-  const handleOnChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { value, name } = e.target;
-
-    setBodyRequest((prev) => {
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
-  };
-
   const handleOnSubmit = () => {
     UpdateItemProjectMutate({
-      title: bodyRequest.title,
-      endDate: bodyRequest.endDate,
-      startDate: bodyRequest.startDate,
-      startTime: bodyRequest.startTime,
-      endTime: bodyRequest.endTime,
-      priority: bodyRequest.priority,
-      projectGroupId: bodyRequest.projectGroupId,
+      title: getValues("title"),
+      endDate: getValues("endDate"),
+      startDate: getValues("startDate"),
+      startTime: getValues("startTime"),
+      endTime: getValues("endTime"),
+      priority: getValues("priority"),
+      projectGroupId: getValues("projectGroupId"),
       description: editor?.getHTML() as string,
-      assignedUsers: bodyRequest?.assignedUsers as any,
-    });
-
-    setBodyRequest({
-      title: data.title,
-      description: data.description,
-      projectGroupId: projectGroupId,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      startTime: data.startDate.toString().split("T")[1],
-      endTime: data.endDate.toString().split("T")[1],
-      priority: data.priority,
-      assignedUsers: data.assignedUsers.map((item: AssignedType | any) => {
-        return {
-          id: item.assigned.id,
-          email: item.assigned.email,
-          name: item.assigned.name,
-        };
-      }) as any,
+      assignedUsers: getValues("assignedUsers"),
     });
   };
 
@@ -184,7 +158,7 @@ const UpdateItemProjectSheet = ({
     }
   }, [editor, data.description]);
 
-  console.log(projectGroupId);
+  console.log(data.assignedUsers);
 
   return (
     <Sheet>
@@ -206,16 +180,15 @@ const UpdateItemProjectSheet = ({
                   <FormItem>
                     <FormControl>
                       <input
+                        {...field}
                         placeholder="Title Item"
                         name="title"
-                        value={bodyRequest.title}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          handleOnChange(e);
-                        }}
+                        value={getValues("title")}
                         className=" placeholder-shown:text-3xl font-bold text-3xl focus:outline-none shadow-none"
                       />
                     </FormControl>
+
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -234,13 +207,7 @@ const UpdateItemProjectSheet = ({
                           <h1 className=" text-sm">Start Date</h1>
                         </FormLabel>
                         <FormControl className="">
-                          <DateTimePicker
-                            onChange={(e) => {
-                              field.onChange(e);
-                              handleOnChange(e);
-                            }}
-                            name="start"
-                          />
+                          <DateTimePicker {...field} name="start" />
                         </FormControl>
 
                         <FormMessage />
@@ -261,14 +228,9 @@ const UpdateItemProjectSheet = ({
                         </FormLabel>
                         <FormControl className="  w-full">
                           <SelectAssigned
-                            assignedData={bodyRequest?.assignedUsers}
+                            {...field}
+                            assignedData={getValues("assignedUsers")}
                             name="assignedUsers"
-                            onChange={(value) => {
-                              field.onChange(value);
-                              handleOnChange({
-                                target: { name: "assignedUsers", value },
-                              } as any);
-                            }}
                           />
                         </FormControl>
 
@@ -281,7 +243,7 @@ const UpdateItemProjectSheet = ({
                 <div className=" flex flex-col justify-start items-start  min-h-full">
                   <FormField
                     control={control}
-                    name="timezone"
+                    name="endDate"
                     render={({ field }) => (
                       <FormItem className=" w-full flex flex-row gap-3 justify-center items-center">
                         <FormLabel className=" flex flex-row items-center gap-2 min-w-[120px]">
@@ -289,7 +251,7 @@ const UpdateItemProjectSheet = ({
                           <h1 className=" text-sm">Due Date</h1>
                         </FormLabel>
                         <FormControl className="">
-                          <DateTimePicker name="start" />
+                          <DateTimePicker {...field} name="endDate" />
                         </FormControl>
 
                         <FormMessage />
@@ -309,14 +271,7 @@ const UpdateItemProjectSheet = ({
                           Priority
                         </FormLabel>
                         <FormControl className="  w-full">
-                          <SelectPriority
-                            onChange={(value) => {
-                              field.onChange(value);
-                              handleOnChange({
-                                target: { name: "priority", value },
-                              } as any);
-                            }}
-                          />
+                          <SelectPriority {...field} />
                         </FormControl>
 
                         <FormMessage />

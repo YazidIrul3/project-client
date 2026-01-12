@@ -1,4 +1,4 @@
-import { axiosInstance } from "@/lib/axios";
+import { axiosInstance } from "@/libs/axios";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 export const getLogin = async () => {

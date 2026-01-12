@@ -38,11 +38,15 @@ const ItemProject = ({
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
       className=" min-w-full flex flex-row items-center gap-2 shadow-sm px-2 py-2.5 rounded-md"
     >
-      <h1 className=" truncate max-w-11/12 min-w-11/12">{data.title}</h1>
+      <h1
+        {...attributes}
+        {...listeners}
+        className=" truncate max-w-11/12 min-w-11/12"
+      >
+        {data.title}
+      </h1>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -68,7 +72,7 @@ const ItemProject = ({
 
           <DropdownMenuItem
             onSelect={(e) => e.preventDefault()}
-            className=" min-w-full"
+            className=" min-w-full z-40"
           >
             <div>
               <DeleteItemProjectGroupSheet id={data.id} />

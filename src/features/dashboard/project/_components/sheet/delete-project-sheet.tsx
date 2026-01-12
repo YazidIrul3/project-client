@@ -7,27 +7,29 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/libs/auth-client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
+import { useDeleteProject } from "@/features/api/project/delete-project";
 import { Form } from "@/components/ui/form";
-import { useDeleteProjectGroup } from "@/features/api/projectGroup/delete-projectGroup";
+import { useRouter } from "next/navigation";
 
-type DeleteProjectGroupSheet = {
+type DeleteProjectSheet = {
   id: string;
 };
 
-const DeleteProjectGroupSheet = (props: DeleteProjectGroupSheet) => {
+const DeleteProjectSheet = (props: DeleteProjectSheet) => {
+  const router = useRouter();
   const { data: session } = authClient.useSession();
-  const { mutate: deleteProjectGroupMutation } = useDeleteProjectGroup({
+  const { mutate: deleteProjectMutation } = useDeleteProject({
     token: session?.session.token as string,
     id: props?.id,
     mutationConfig: {
       onSuccess: () => {
-        toast.success("Delete Project Group success");
+        toast.success("Delete Project success");
 
-        window.location.reload();
+        router.replace("/account/profile");
       },
     },
   });
@@ -35,7 +37,7 @@ const DeleteProjectGroupSheet = (props: DeleteProjectGroupSheet) => {
 
   const handleOnDelete = () => {
     if (session) {
-      deleteProjectGroupMutation({
+      deleteProjectMutation({
         token: session?.session.token as string,
         id: props?.id,
       });
@@ -58,8 +60,8 @@ const DeleteProjectGroupSheet = (props: DeleteProjectGroupSheet) => {
                 Delete Project
               </SheetTitle>
               <SheetDescription>
-                Warning! If you delete this project group, all items in project
-                will disapear
+                Warning! If you delete project, all items in project will
+                disapear
               </SheetDescription>
             </SheetHeader>
 
@@ -78,4 +80,4 @@ const DeleteProjectGroupSheet = (props: DeleteProjectGroupSheet) => {
   );
 };
 
-export default DeleteProjectGroupSheet;
+export default DeleteProjectSheet;

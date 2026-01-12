@@ -7,7 +7,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/libs/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -17,13 +17,14 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { SettingsIcon } from "lucide-react";
 import { ProjectBodyRequest } from "@/types/api/project";
-import SheetSideBackground from "./sheet-side-background";
+import SheetSideBackground from "../../../_components/sheets/sheet-side-background";
 import {
   Card,
   CardDescription,
@@ -32,7 +33,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import DeleteProjectSheet from "./delete-project-sheet";
-import { useUpdateProject } from "@/features/api/project/update-project";
+import {
+  updateProjectSchema,
+  UpdateProjectSchema,
+  useUpdateProject,
+} from "@/features/api/project/update-project";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 type UpdateDeleteProjectSheet = {
   id: string;
@@ -41,13 +47,7 @@ type UpdateDeleteProjectSheet = {
 
 const UpdateDeleteProjectSheet = (props: UpdateDeleteProjectSheet) => {
   const { data: session } = authClient.useSession();
-  const router = useRouter();
-  const form = useForm();
-  const { control } = useForm();
-  const [bodyRequest, setBodyRequest] = useState<ProjectBodyRequest>({
-    name: props?.name,
-    template: "",
-  });
+
   const { mutate: updateProjectMutation } = useUpdateProject({
     id: props.id,
     token: session?.session.token as string,
@@ -60,27 +60,18 @@ const UpdateDeleteProjectSheet = (props: UpdateDeleteProjectSheet) => {
     },
   });
 
-  const handleOnChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { value, name } = e.target;
+  const form = useForm<UpdateProjectSchema>({
+    resolver: zodResolver(updateProjectSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: props.name,
+    },
+  });
 
-    setBodyRequest((prev) => {
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
-  };
-
+  const { control, getValues } = form;
   const handleOnSubmit = () => {
     updateProjectMutation({
-      name: bodyRequest.name,
-    });
-
-    setBodyRequest({
-      name: props.name,
-      template: "",
+      name: getValues("name"),
     });
   };
 
@@ -103,7 +94,7 @@ const UpdateDeleteProjectSheet = (props: UpdateDeleteProjectSheet) => {
           <div className=" flex flex-col w-full ">
             <SheetHeader className=" mb-3">
               <SheetTitle className=" text-xl font-bold">
-                Create New Project
+                Update Project Sheet
               </SheetTitle>
               <SheetDescription>
                 Project will help you for making flow of your project
@@ -119,15 +110,13 @@ const UpdateDeleteProjectSheet = (props: UpdateDeleteProjectSheet) => {
                     <FormLabel className=" mb-2">Project Name</FormLabel>
                     <FormControl>
                       <Input
+                        {...field}
                         placeholder="Type Project name"
                         name="name"
-                        value={bodyRequest?.name}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          handleOnChange(e);
-                        }}
                       />
                     </FormControl>
+
+                    <FormMessage />
                   </FormItem>
                 )}
               />

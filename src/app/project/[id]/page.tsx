@@ -7,8 +7,6 @@ interface PageProps {
 }
 
 const Page = ({ params }: PageProps) => {
-  console.log(params?.id);
-
   return <ProjectPage />;
 };
 

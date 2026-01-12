@@ -1,10 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { EllipsisVertical, MoveIcon, SettingsIcon } from "lucide-react";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { MoveIcon } from "lucide-react";
 import CreateItemProject from "../../sheet/create-item-project";
 import { ProjectGroupEntity } from "@/types/api/project-group";
-import UpdateProjectGroupSheet from "../../../../_components/sheets/update-projectGroup-sheet";
+import UpdateProjectGroupSheet from "../../sheet/update-projectGroup-sheet";
 import { useGetItemProjectGroupByProjectGroupId } from "@/features/api/itemProject/get-itemProject";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/libs/auth-client";
 import { ItemProjectGroupEntity } from "@/types/api/item-project-group";
 import ItemProject from "../../item-project";
 import { SortableContext, useSortable } from "@dnd-kit/sortable";
@@ -12,7 +12,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useMemo } from "react";
 
 type ColumnContainerKanban = {
-  data?: ProjectGroupEntity;
+  data: ProjectGroupEntity;
 };
 
 const ColumnContainerKanban = (props: ColumnContainerKanban) => {

@@ -5,4 +5,4 @@ const TodoPage = () => {
   return <TodoSection />;
 };
 
-export default withAuthUser(TodoPage);
+export default TodoPage;
