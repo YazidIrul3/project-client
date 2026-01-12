@@ -10,9 +10,11 @@ import {
 } from "@/features/api/workspace/create-workspace";
 import { authClient } from "@/libs/auth-client";
 import { useRouter } from "next/navigation";
+import { useAuthenticated } from "@/hooks/use-authenticated";
 
 const DashbaordLayout = ({ children }: { children: React.ReactNode }) => {
   const { isLoading, setIsLoading } = useLoading();
+  const { isAuthenticated } = useAuthenticated();
   // const { data, isPending } = authClient.useSession();
   // const router = useRouter();
   // const { workspace: currentWorkspace, setCurrentWorkspace } =
@@ -58,9 +60,11 @@ const DashbaordLayout = ({ children }: { children: React.ReactNode }) => {
   //   );
   // }, [data?.session?.token]);
 
+  console.log(isAuthenticated);
+
   return (
     <>
-      {isLoading ? (
+      {isLoading || !isAuthenticated ? (
         <Spinner />
       ) : (
         <SidebarProvider

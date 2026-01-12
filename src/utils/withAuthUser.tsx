@@ -77,9 +77,9 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
       hasInitialized.current = true;
     }, [isSessionLoading, data?.session?.token, workspace?.name, redirectUrl]);
 
-    if (isSessionLoading || isCreatingWorkspace) {
-      return <Spinner />;
-    }
+    // if (isSessionLoading || isCreatingWorkspace) {
+    //   return <Spinner />;
+    // }
 
     return <OriginalComponent {...rest} />;
   };
