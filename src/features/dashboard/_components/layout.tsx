@@ -60,8 +60,6 @@ const DashbaordLayout = ({ children }: { children: React.ReactNode }) => {
   //   );
   // }, [data?.session?.token]);
 
-  console.log(isAuthenticated);
-
   return (
     <>
       {isLoading || !isAuthenticated ? (

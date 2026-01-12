@@ -4,6 +4,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useCreateWorkspace } from "@/features/api/workspace/create-workspace";
 import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-workspace";
 import { useAuthenticated } from "@/hooks/use-authenticated";
+import { useLoading } from "@/hooks/use-loading";
 import { authClient } from "@/libs/auth-client";
 import { useRouter } from "next/navigation";
 import { ComponentType, useEffect, useRef } from "react";
@@ -17,6 +18,7 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
     const { onLogin } = useAuthenticated();
     const { workspace, setCurrentWorkspace } = useCurrentWorkspace();
     const router = useRouter();
+    const { setIsLoading } = useLoading();
 
     const { mutate: createWorkspace, isPending: isCreatingWorkspace } =
       useCreateWorkspace({
@@ -27,6 +29,8 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
     const hasInitialized = useRef(false);
 
     useEffect(() => {
+      if (isCreatingWorkspace) return setIsLoading(true);
+
       if (hasInitialized.current) return;
 
       // ⛔ tunggu session selesai
@@ -73,6 +77,8 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
         name: workspaceName,
         userId: data.user.id,
       });
+
+      setIsLoading(false);
 
       hasInitialized.current = true;
     }, [isSessionLoading, data?.session?.token, workspace?.name, redirectUrl]);

@@ -101,6 +101,7 @@ export const WorkspaceForm = ({
 
           <FormField
             control={control}
+            defaultValue={getValues("name")}
             name="name"
             render={({ field }) => (
               <FormItem>
@@ -115,6 +116,7 @@ export const WorkspaceForm = ({
           />
           <FormField
             control={control}
+            defaultValue={getValues("timezone")}
             name="timezone"
             render={({ field }) => (
               <FormItem>
@@ -191,7 +193,7 @@ export const WorkspaceSection = () => {
   const { token } = useAuthenticated();
   const { data: workspaceSidebarData, isLoading: workspaceSidebarDataLoading } =
     useGetWorkspaceSidebar({
-      token: token as string,
+      token: token,
       userId: currentWorkspace.userId,
       workspaceName: currentWorkspace.name,
     });

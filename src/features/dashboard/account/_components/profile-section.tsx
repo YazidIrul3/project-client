@@ -23,7 +23,6 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-import { Spinner } from "@/components/ui/spinner";
 import {
   Select,
   SelectContent,
@@ -39,13 +38,14 @@ import {
 } from "@/features/api/user/update-user";
 import { useLoading } from "@/hooks/use-loading";
 import { useAuthenticated } from "@/hooks/use-authenticated";
+import { authClient } from "@/libs/auth-client";
 
 export const ProfileSection = () => {
-  const { isLoading, setIsLoading } = useLoading();
+  const { setIsLoading } = useLoading();
   const { token, user } = useAuthenticated();
-  const { data: profile, isLoading: fetchProfileLoading } = useGetProfile(
-    token as string
-  );
+  const { data: profile, isLoading: fetchProfileLoading } =
+    useGetProfile(token);
+  // const { data: session } = authClient.useSession();
   const { mutate: updateUserMutation, isPending: updateUserLoading } =
     useUpdateUser({
       mutationConfig: {
@@ -60,9 +60,9 @@ export const ProfileSection = () => {
     resolver: zodResolver(updateUserSchema),
     mode: "onChange",
     defaultValues: {
-      name: profile?.data?.name,
-      number_phone: profile?.data?.number_phone,
-      timezone: profile?.data?.timezone,
+      name: "",
+      number_phone: "",
+      timezone: "",
     },
   });
   const { control, getValues } = form;
@@ -76,15 +76,20 @@ export const ProfileSection = () => {
   };
 
   useEffect(() => {
-    if (fetchProfileLoading) setIsLoading(true);
+    if (fetchProfileLoading || updateUserLoading) setIsLoading(true);
 
-    form.reset({
-      name: getValues("name"),
-      number_phone: getValues("number_phone"),
-      timezone: getValues("timezone"),
-    });
-    setIsLoading(false);
-  }, [fetchProfileLoading]);
+    if (profile) {
+      setIsLoading(false);
+
+      form.reset({
+        name: profile?.data?.name,
+        number_phone: profile?.data?.number_phone,
+        timezone: profile?.data?.timezone,
+      });
+    }
+  }, [form, profile]);
+
+  console.log(getValues("name"));
 
   return (
     <section>
@@ -99,12 +104,11 @@ export const ProfileSection = () => {
               <CardContent className="flex flex-col gap-3">
                 <h4 className=" font-semibold">Avatar</h4>
                 <div className=" bg-red-600 text-slate-50 font-bold w-fit text-2xl px-5 py-3 flex justify-center items-center rounded-xl">
-                  {getValues("name")?.charAt(0)}
+                  {profile?.data?.name?.charAt(0)}
                 </div>
                 <FormField
                   control={control}
                   name="name"
-                  defaultValue={getValues("name")}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Your Name</FormLabel>
@@ -124,7 +128,9 @@ export const ProfileSection = () => {
                   className=" w-fit"
                   type="button"
                   onClick={handleUpdateUser}
-                  disabled={updateUserLoading}
+                  disabled={
+                    profile?.data?.name === getValues("name") ? true : false
+                  }
                 >
                   Save
                 </Button>
@@ -142,7 +148,6 @@ export const ProfileSection = () => {
               <CardContent className="flex flex-col gap-3">
                 <FormField
                   control={control}
-                  defaultValue={getValues("timezone")}
                   name="timezone"
                   render={({ field }) => (
                     <FormItem>
@@ -150,6 +155,7 @@ export const ProfileSection = () => {
                       <FormControl className="lg:w-9/12 w-full">
                         <Select
                           value={field.value}
+                          // defaultValue={profile?.data?.timezone}
                           onValueChange={field.onChange}
                         >
                           <SelectTrigger>

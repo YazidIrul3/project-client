@@ -51,6 +51,7 @@ import CreateProjectSheet from "../project/_components/sheet/create-project-shee
 import { useLoading } from "@/hooks/use-loading";
 import { ProjectEntity } from "@/types/api/project";
 import { UserEntity } from "@/types/api/user";
+import { useAuthenticated } from "@/hooks/use-authenticated";
 
 export const AppSidebarHeader = ({
   workspaceSidebarData,
@@ -60,10 +61,11 @@ export const AppSidebarHeader = ({
   const { workspace: currentWorkspace, setCurrentWorkspace } =
     useCurrentWorkspace();
   const { open } = useSidebar();
+  const { token, user } = useAuthenticated();
   const { data: session } = authClient.useSession();
   const { data: workspaceByUser, isLoading: workspaceByUserLoading } =
     useGetWorkspacesByUser({
-      token: session?.session.token as string,
+      token: token,
       userId: currentWorkspace.userId,
     });
 
@@ -124,7 +126,7 @@ export const AppSidebarHeader = ({
                       onClick={() => {
                         setCurrentWorkspace({
                           name: item?.name,
-                          userId: session?.user.id as string,
+                          userId: user.id,
                         });
 
                         // router.refresh();
@@ -346,20 +348,26 @@ export const AppSidebarFooter = () => {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { workspace, setCurrentWorkspace } = useCurrentWorkspace();
+  const { workspace } = useCurrentWorkspace();
   const { isLoading, setIsLoading } = useLoading();
+  const { token, user } = useAuthenticated();
   const { open } = useSidebar();
-  const { data: session } = authClient.useSession();
+  // const { data: session } = authClient.useSession();
   const { data: workspaceSidebarData, isLoading: workspaceSidebarDataLoading } =
     useGetWorkspaceSidebar({
-      token: session?.session.token as string,
+      token: token,
       userId: workspace.userId,
       workspaceName: workspace.name,
-      queryConfig: {
-        enabled:
-          !!session?.session.token && !!workspace.userId && !!workspace.name,
-      },
+      // queryConfig: {
+      //   enabled: !!token && !!workspace.userId && !!workspace.name,
+      // },
     });
+
+  React.useEffect(() => {
+    if (workspaceSidebarDataLoading) setIsLoading(true);
+
+    setIsLoading(false);
+  }, [workspaceSidebarDataLoading]);
 
   return (
     <div>
