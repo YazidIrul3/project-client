@@ -52,8 +52,16 @@ import {
 } from "@/features/api/chatChannel/create-chatChannel";
 import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-workspace";
 import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
-import { useUpdatChatChannel } from "@/features/api/chatChannel/update-chatChannel";
-import { ChatChannelEntity } from "@/types/api/chat-channel";
+import {
+  updatChatChannelSchema,
+  UpdatChatChannelSchema,
+  useUpdatChatChannel,
+} from "@/features/api/chatChannel/update-chatChannel";
+import {
+  ChatChannelEntity,
+  ChatChannelMemberEntity,
+} from "@/types/api/chat-channel";
+import { useAuthenticated } from "@/hooks/use-authenticated";
 
 const UpdateChatChanneleSheet = ({
   data: chatChannelData,
@@ -61,23 +69,12 @@ const UpdateChatChanneleSheet = ({
   data: ChatChannelEntity;
 }) => {
   const { data } = authClient.useSession();
-  const { workspace: currentWorkspace } = useCurrentWorkspace();
   const [checked, setChecked] = useState<boolean>(false);
-  const token = data?.session.token;
-  const {
-    data: workspaceByNameAndUserId,
-    isLoading: workspaceSidebarDataLoading,
-  } = useGetWorkspaceSidebar({
-    token: token as string,
-    userId: currentWorkspace.userId,
-    workspaceName: currentWorkspace.name,
-    queryConfig: {
-      enabled: !!token && !!currentWorkspace.userId && !!currentWorkspace.name,
-    },
-  });
+  const { token, user } = useAuthenticated();
+
   const { mutate: updateChatChannelMutation } = useUpdatChatChannel({
-    id: data?.user.id as string,
-    token: token as string,
+    id: chatChannelData.id,
+    token: token,
     mutationConfig: {
       onSuccess: () => {
         toast.success("Chat channel updated successfully");
@@ -87,19 +84,18 @@ const UpdateChatChanneleSheet = ({
     },
   });
 
-  const form = useForm<CreateChatChannelSchema>({
-    resolver: zodResolver(createChatChannelSchema),
+  const form = useForm<UpdatChatChannelSchema>({
+    resolver: zodResolver(updatChatChannelSchema),
     mode: "onChange",
     defaultValues: {
       name: chatChannelData.name,
       description: chatChannelData.description,
       type: checked ? "private" : "general",
-      workspaceId: workspaceByNameAndUserId.id,
-      chatChannelMembers: [
-        {
-          memberId: currentWorkspace.userId,
-        },
-      ],
+      chatChannelMembers: chatChannelData.chatChannelMember?.map((item) => {
+        return {
+          memberId: item.member.id,
+        };
+      }),
     },
   });
   const { control, getValues } = form;
@@ -108,7 +104,7 @@ const UpdateChatChanneleSheet = ({
   const handleOnSubmit = () => {
     updateChatChannelMutation({
       name: getValues("name"),
-      description: getValues("description") as string,
+      description: getValues("description"),
       type: checked ? "private" : "general",
       chatChannelMembers: getValues("chatChannelMembers"),
     });
@@ -167,7 +163,6 @@ const UpdateChatChanneleSheet = ({
                           {...field}
                           placeholder="Description"
                           name="description"
-                          value={getValues("description") as string}
                           className=" w-full"
                         />
                       </FormControl>

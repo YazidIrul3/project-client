@@ -4,20 +4,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import z from "zod";
 import { getChatChannelQuery } from "./create-chatChannel";
 
-const updatChatChannelSchemaSchema = z.object({
-  name: z.string(),
-  description: z.string(),
+export const updatChatChannelSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
   type: z.string(),
   chatChannelMembers: z.array(
     z.object({
-      memberId: z.uuid(),
+      memberId: z.string(),
     })
   ),
 });
 
-export type UpdatChatChannelSchema = z.infer<
-  typeof updatChatChannelSchemaSchema
->;
+export type UpdatChatChannelSchema = z.infer<typeof updatChatChannelSchema>;
 
 export const updatChatChannel = async (
   data: UpdatChatChannelSchema,

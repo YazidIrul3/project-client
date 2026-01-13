@@ -73,7 +73,7 @@ const CreateChatChanneleSheet = () => {
       workspaceId: workspaceByNameAndUserId?.id,
       chatChannelMembers: [
         {
-          memberId: currentWorkspace.userId,
+          memberId: currentWorkspace?.userId,
         },
       ],
     },
@@ -86,7 +86,7 @@ const CreateChatChanneleSheet = () => {
       name: getValues("name"),
       description: getValues("description"),
       type: checked ? "private" : "general",
-      workspaceId: getValues("workspaceId"),
+      workspaceId: workspaceByNameAndUserId?.id,
       chatChannelMembers: getValues("chatChannelMembers"),
     });
   };

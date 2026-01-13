@@ -89,8 +89,6 @@ export const ProfileSection = () => {
     }
   }, [form, profile]);
 
-  console.log(getValues("name"));
-
   return (
     <section>
       <AccountLayout>

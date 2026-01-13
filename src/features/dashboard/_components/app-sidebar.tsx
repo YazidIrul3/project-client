@@ -73,8 +73,6 @@ export const AppSidebarHeader = ({
     (item: WorkspaceMemberEntity) => item.memberId == currentWorkspace.userId
   );
 
-  console.log(userData);
-
   return (
     <SidebarHeader className="py-3 flex flex-col gap-4  ">
       <SidebarMenu>

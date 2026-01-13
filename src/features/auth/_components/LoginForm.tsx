@@ -21,13 +21,15 @@ export const LoginForm = () => {
     useCreateWorkspace({
       token: data?.session.token,
     });
-  const { onLogin } = useAuthenticated();
+  const { onLogin, isAuthenticated } = useAuthenticated();
 
   const handleOnSubmit = () => {
     setIsLoading(true);
 
     onSubmit();
   };
+
+  console.log(isAuthenticated);
 
   return (
     <div className=" flex flex-col gap-7 justify-center items-center w-full max-w-sm">

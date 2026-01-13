@@ -17,8 +17,8 @@ const DashbaordLayout = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuthenticated();
   // const { data, isPending } = authClient.useSession();
   // const router = useRouter();
-  // const { workspace: currentWorkspace, setCurrentWorkspace } =
-  //   useCurrentWorkspace();
+  const { workspace: currentWorkspace, setCurrentWorkspace } =
+    useCurrentWorkspace();
 
   // const { mutate: createWorkspaceMutation, isPending: createWorkspaceLoading } =
   //   useCreateWorkspace({
@@ -62,7 +62,7 @@ const DashbaordLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      {isLoading || !isAuthenticated ? (
+      {isLoading || !isAuthenticated || currentWorkspace == undefined ? (
         <Spinner />
       ) : (
         <SidebarProvider

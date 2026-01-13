@@ -19,7 +19,7 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
     const { workspace, setCurrentWorkspace } = useCurrentWorkspace();
     const router = useRouter();
     const { setIsLoading } = useLoading();
-
+    const { isAuthenticated } = useAuthenticated();
     const { mutate: createWorkspace, isPending: isCreatingWorkspace } =
       useCreateWorkspace({
         token: data?.session?.token,
@@ -29,7 +29,8 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
     const hasInitialized = useRef(false);
 
     useEffect(() => {
-      if (isCreatingWorkspace) return setIsLoading(true);
+      if (isCreatingWorkspace && isAuthenticated == undefined)
+        return setIsLoading(true);
 
       if (hasInitialized.current) return;
 
@@ -50,38 +51,48 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
         workspace?.name === null
       ) {
         hasInitialized.current = true;
+
         return;
       }
 
       const workspaceName = `${data.user.name}'s Space`;
 
-      onLogin(
-        data?.session.token as string,
-        {
-          id: data?.user.id as string,
-          email: data?.user.email as string,
-          name: data?.user.name as string,
-        },
-        data?.session.expiresAt as Date
-      );
+      if (!isAuthenticated) {
+        onLogin(
+          data?.session.token as string,
+          {
+            id: data?.user.id as string,
+            email: data?.user.email as string,
+            name: data?.user.name as string,
+          },
+          data?.session.expiresAt as Date
+        );
 
-      createWorkspace({
-        avatar: "tes",
-        name: workspaceName,
-        timezone: "tes",
-        userId: data.user.id,
-        workspaceTypeName: "personal",
-      });
+        createWorkspace({
+          avatar: "tes",
+          name: workspaceName,
+          timezone: "tes",
+          userId: data.user.id,
+          workspaceTypeName: "personal",
+        });
 
-      setCurrentWorkspace({
-        name: workspaceName,
-        userId: data.user.id,
-      });
+        setCurrentWorkspace({
+          name: workspaceName,
+          userId: data.user.id,
+        });
+
+        setIsLoading(false);
+
+        hasInitialized.current = true;
+      }
 
       setIsLoading(false);
-
-      hasInitialized.current = true;
-    }, [isSessionLoading, data?.session?.token, workspace?.name, redirectUrl]);
+    }, [
+      isSessionLoading,
+      data?.session?.token,
+      workspace?.name,
+      isAuthenticated,
+    ]);
 
     // if (isSessionLoading || isCreatingWorkspace) {
     //   return <Spinner />;
