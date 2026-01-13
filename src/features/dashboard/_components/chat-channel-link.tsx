@@ -3,6 +3,7 @@ import UpdateChatChanneleSheet from "../chatChannel/_components/sheet/update-cha
 import { ChatChannelEntity } from "@/types/api/chat-channel";
 import Link from "next/link";
 import { Hash } from "lucide-react";
+import DeleteChatChannelSheet from "../chatChannel/_components/sheet/delete-chat-channel";
 
 export const ChatChannelLink = ({
   data: item,
@@ -26,8 +27,16 @@ export const ChatChannelLink = ({
         <h1 className=" text-sm font-semibold">{item.name}</h1>
       </div>
 
-      <div className={`${pathname == `/channel/${item.id}` ? "" : "hidden"}`}>
+      <div
+        className={`${
+          pathname == `/channel/${item.id}` ? "" : "hidden"
+        } flex flex-row items-center justify-center `}
+      >
         <div>
+          <DeleteChatChannelSheet chatChannelData={item} />
+        </div>
+
+        <div className=" flex justify-start items-center">
           <UpdateChatChanneleSheet data={item} />
         </div>
       </div>

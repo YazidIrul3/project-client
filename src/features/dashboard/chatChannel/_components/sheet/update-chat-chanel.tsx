@@ -118,7 +118,7 @@ const UpdateChatChanneleSheet = ({
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild className=" w-fit font-normal text-sm px-2 py-2">
         <div className=" w-fit">
-          <SettingsIcon size={16} className=" w-fit h-fit" />
+          <SettingsIcon size={18} className=" w-fit h-fit" />
         </div>
       </SheetTrigger>
       <div className="min-w-full mx-auto h-full p-2">

@@ -19,6 +19,7 @@ type UseAuthenticated = {
     expiresAt: Date
   ) => void;
   onLogout: () => void;
+  setToekn: (token: string) => void;
 };
 
 export const useAuthenticated = create<UseAuthenticated>()(
@@ -45,6 +46,7 @@ export const useAuthenticated = create<UseAuthenticated>()(
           isAuthenticated: false,
         });
       },
+      setToekn: (token) => set({ token }),
     }),
     {
       name: "authenticated-storage",

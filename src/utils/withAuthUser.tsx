@@ -15,7 +15,7 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
 
     const { data, isPending, isRefetching } = authClient.useSession();
     const isSessionLoading = isPending || isRefetching;
-    const { onLogin } = useAuthenticated();
+    const { onLogin, token, setToekn } = useAuthenticated();
     const { workspace, setCurrentWorkspace } = useCurrentWorkspace();
     const router = useRouter();
     const { setIsLoading } = useLoading();
@@ -54,6 +54,8 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
 
         return;
       }
+
+      if (data.session.token != token) setToekn(data.session.token);
 
       const workspaceName = `${data.user.name}'s Space`;
 
