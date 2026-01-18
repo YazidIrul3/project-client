@@ -9,6 +9,7 @@ type UseAuthenticated = {
     id: string;
     email: string;
     name: string;
+    subscription?: string;
   };
   setIsAuthenticated: (isAuthenticated: boolean) => void;
   token: string;
@@ -16,7 +17,7 @@ type UseAuthenticated = {
   onLogin: (
     token: string,
     user: UseAuthenticated["user"],
-    expiresAt: Date
+    expiresAt: Date,
   ) => void;
   onLogout: () => void;
   setToken: (token: string) => void;
@@ -34,7 +35,7 @@ export const useAuthenticated = create<UseAuthenticated>()(
       onLogin: (
         token: string,
         user: UseAuthenticated["user"],
-        expiresAt: Date
+        expiresAt: Date,
       ) => {
         set({ token, user, expiresAt });
       },
@@ -51,6 +52,6 @@ export const useAuthenticated = create<UseAuthenticated>()(
     {
       name: "authenticated-storage",
       storage: createJSONStorage(() => localStorage),
-    }
-  )
+    },
+  ),
 );

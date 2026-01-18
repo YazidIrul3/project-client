@@ -50,7 +50,6 @@ import { ChatChannelLink } from "./chat-channel-link";
 import CreateProjectSheet from "../project/_components/sheet/create-project-sheet";
 import { useLoading } from "@/hooks/use-loading";
 import { ProjectEntity } from "@/types/api/project";
-import { UserEntity } from "@/types/api/user";
 import { useAuthenticated } from "@/hooks/use-authenticated";
 
 export const AppSidebarHeader = ({
@@ -75,6 +74,8 @@ export const AppSidebarHeader = ({
 
     setIsLoading(false);
   }, [workspaceByUserLoading]);
+
+  console.log(workspaceSidebarData);
 
   return (
     <SidebarHeader className="py-3 flex flex-col gap-4  ">

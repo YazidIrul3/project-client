@@ -54,7 +54,7 @@ const CreateWorkspaceSheet = () => {
       avatar: "",
       name: "",
       timezone: "",
-      workspaceTypeName: "",
+      workspaceTypeName: "Team",
       userId: userData.id,
     },
   });
@@ -139,7 +139,11 @@ const CreateWorkspaceSheet = () => {
                   <FormItem>
                     <FormLabel className=" mb-2">Workspace Type</FormLabel>
                     <FormControl className=" lg:w-9/12 w-full">
-                      <Select defaultValue="Team" name="workspaceTypeName">
+                      <Select
+                        {...field}
+                        defaultValue="Team"
+                        name="workspaceTypeName"
+                      >
                         <SelectTrigger>
                           <SelectValue
                             defaultValue={"Team"}
