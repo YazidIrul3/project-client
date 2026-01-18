@@ -7,9 +7,9 @@ import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-wor
 
 export const createWorkspaceInputSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  userId: z.string().min(9, "Number phone need to have 9 digits or more"),
-  timezone: z.string("Timezone must be string"),
-  avatar: z.string("Timezone must be string"),
+  userId: z.string().min(1, "User Id is required"),
+  timezone: z.string("Timezone must be string").optional(),
+  avatar: z.string("Timezone must be string").optional(),
   workspaceTypeName: z.string("Timezone must be string"),
 });
 
@@ -19,7 +19,7 @@ export type CreateWorkspaceInputSchema = z.infer<
 
 export const createWorkspace = async (
   body: CreateWorkspaceInputSchema,
-  token?: string
+  token?: string,
 ) => {
   try {
     const response = await axiosInstance.post("/workspace/", body, {
@@ -57,7 +57,7 @@ export const useCreateWorkspace = (params: useCreateWorkspaceParams) => {
         data,
         Variables,
         onMutateResult,
-        context
+        context,
       );
     },
   });

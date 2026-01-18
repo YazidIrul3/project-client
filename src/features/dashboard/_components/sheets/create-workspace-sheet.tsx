@@ -40,10 +40,12 @@ import { toast } from "sonner";
 import SheetSideBackground from "./sheet-side-background";
 import { useSheet } from "@/hooks/use-sheet";
 import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
+import { useAuthenticated } from "@/hooks/use-authenticated";
 
 const CreateWorkspaceSheet = () => {
   const { data } = authClient.useSession();
-  const token = data?.session.token;
+  // const token = data?.session.token;
+  const { token, user: userData } = useAuthenticated();
   const { workspace: currentWorkspace } = useCurrentWorkspace();
   const form = useForm<CreateWorkspaceInputSchema>({
     resolver: zodResolver(createWorkspaceInputSchema),
@@ -52,16 +54,21 @@ const CreateWorkspaceSheet = () => {
       avatar: "",
       name: "",
       timezone: "",
-      workspaceTypeName: currentWorkspace.name,
-      userId: currentWorkspace.userId,
+      workspaceTypeName: "",
+      userId: userData.id,
     },
   });
   const { mutate: createWorkspaceMutation } = useCreateWorkspace({
     token,
     mutationConfig: {
       onSuccess: () => {
-        toast.success("Workspace created successfully");
-        closeSheet();
+        toast.success("Created Workspace successfully");
+
+        window.location.reload();
+      },
+
+      onError: () => {
+        toast.error("Created Workspace Failed");
       },
     },
   });
@@ -132,11 +139,7 @@ const CreateWorkspaceSheet = () => {
                   <FormItem>
                     <FormLabel className=" mb-2">Workspace Type</FormLabel>
                     <FormControl className=" lg:w-9/12 w-full">
-                      <Select
-                        {...field}
-                        defaultValue="Team"
-                        name="workspaceTypeName"
-                      >
+                      <Select defaultValue="Team" name="workspaceTypeName">
                         <SelectTrigger>
                           <SelectValue
                             defaultValue={"Team"}
@@ -167,7 +170,7 @@ const CreateWorkspaceSheet = () => {
                   <FormItem>
                     <FormLabel className=" mb-2">Timezone</FormLabel>
                     <FormControl className=" lg:w-9/12 w-full">
-                      <Select {...field} name="timezone">
+                      <Select defaultValue="est" name="timezone">
                         <SelectTrigger value={"tes"}>
                           <SelectValue placeholder="Select a timezone" />
                         </SelectTrigger>

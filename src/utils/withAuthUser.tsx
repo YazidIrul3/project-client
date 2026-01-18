@@ -82,12 +82,12 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
           workspaceTypeName: "personal",
         });
 
-        if (isAuthenticated) {
-          setCurrentWorkspace({
-            name: workspaceName,
-            userId: data.user.id,
-          });
-        }
+        // if (isAuthenticated) {
+        //   setCurrentWorkspace({
+        //     name: workspaceName,
+        //     userId: data.user.id,
+        //   });
+        // }
 
         setIsLoading(false);
 
