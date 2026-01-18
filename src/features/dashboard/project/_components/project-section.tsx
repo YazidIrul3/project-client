@@ -1,5 +1,5 @@
 import { useGetProject } from "@/features/api/project/get-project";
-import DashbaordLayout from "../../_components/layout";
+import DashboardLayout from "../../_components/layout";
 import { authClient } from "@/libs/auth-client";
 import { Button } from "@/components/ui/button";
 import { ProjectKanbanView } from "./view/kanban/project-kanban";
@@ -66,7 +66,7 @@ export const ProjectSection = (props: { projectId: string }) => {
   }, [isProjectLoading]);
 
   return (
-    <DashbaordLayout>
+    <DashboardLayout>
       <section className=" min-h-screen max-w-screen overflow-hidden p-5">
         <ProjectSectionHeader data={project?.data} />
 
@@ -77,6 +77,6 @@ export const ProjectSection = (props: { projectId: string }) => {
           />
         </div>
       </section>
-    </DashbaordLayout>
+    </DashboardLayout>
   );
 };

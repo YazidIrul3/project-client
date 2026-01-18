@@ -35,14 +35,20 @@ type CreateProjectGroupSheetProps = {
   projectId: string;
 };
 
-const CreateProjectGroupSheet = (props: CreateProjectGroupSheetProps) => {
+const CreateProjectGroupSheet = ({
+  projectId,
+  projectLength,
+}: {
+  projectId: string;
+  projectLength: number;
+}) => {
   const form = useForm<CreateProjectGroupSchema>({
     resolver: zodResolver(createProjectGroupSchema),
     mode: "onChange",
     defaultValues: {
       name: "",
       color: ProjectGroupColors[0].value,
-      projectId: props.projectId,
+      projectId: projectId,
     },
   });
   const { control, getValues, setValue } = form;
@@ -64,6 +70,7 @@ const CreateProjectGroupSheet = (props: CreateProjectGroupSheetProps) => {
       color: getValues("color"),
       name: getValues("name"),
       projectId: getValues("projectId"),
+      index: projectLength,
     });
   };
 

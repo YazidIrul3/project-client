@@ -1,4 +1,5 @@
 import { Entity } from "./api";
+import { ChatEntity } from "./chat";
 import { UserEntity } from "./user";
 
 export type ChatChannelMemberEntity = Entity<{
@@ -11,5 +12,7 @@ export type ChatChannelEntity = Entity<{
   name: string;
   description: string;
   type: string;
+  workspaceId: string;
   chatChannelMember: ChatChannelMemberEntity[];
+  chat: ChatEntity[];
 }>;

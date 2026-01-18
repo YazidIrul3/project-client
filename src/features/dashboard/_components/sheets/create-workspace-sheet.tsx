@@ -78,8 +78,6 @@ const CreateWorkspaceSheet = () => {
     });
   };
 
-  console.log(currentWorkspace);
-
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger

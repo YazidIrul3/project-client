@@ -7,6 +7,7 @@ import { getProjectGroupQuery } from "./create-projectGroup";
 export const updateProjectGroupSchema = z.object({
   name: z.string().min(1, "Name is required"),
   color: z.string("Color must be string").min(1, "Color is required"),
+  index: z.int().optional(),
 });
 
 export type UpdateProjectGroupSchema = z.infer<typeof updateProjectGroupSchema>;

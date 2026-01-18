@@ -8,4 +8,6 @@ export type ChatEntity = Entity<{
   type: string;
   chatChannel: ChatChannelEntity;
   user: UserEntity;
+  sender: UserEntity;
+  replies: ChatEntity;
 }>;

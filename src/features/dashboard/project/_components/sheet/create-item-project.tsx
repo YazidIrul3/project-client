@@ -50,7 +50,15 @@ type CreateItemProjectProps = {
   borderColor: string;
 };
 
-const CreateItemProject = (props: CreateItemProjectProps) => {
+const CreateItemProject = ({
+  projectGroupId,
+  borderColor,
+  lengthItemProject,
+}: {
+  projectGroupId: string;
+  borderColor: string;
+  lengthItemProject: number;
+}) => {
   const { data } = authClient.useSession();
   const { mutate: CreateItemProjectMutate } = useCreateItemProjectGroup({
     token: authClient.useSession().data?.session.token as string,
@@ -106,7 +114,7 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
     defaultValues: {
       title: "",
       description: "",
-      projectGroupId: props.id,
+      projectGroupId,
       startDate: new Date(),
       endDate: new Date(),
       startTime: "07:00",
@@ -142,7 +150,7 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
       <SheetTrigger
         asChild
         style={{
-          borderColor: props.borderColor || "gray",
+          borderColor: borderColor || "gray",
         }}
         className=" min-w-full border-dashed border-2 z-40"
       >

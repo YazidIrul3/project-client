@@ -12,9 +12,9 @@ import { authClient } from "@/libs/auth-client";
 import { useRouter } from "next/navigation";
 import { useAuthenticated } from "@/hooks/use-authenticated";
 
-const DashbaordLayout = ({ children }: { children: React.ReactNode }) => {
+const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { isLoading, setIsLoading } = useLoading();
-  const { isAuthenticated } = useAuthenticated();
+  const { isAuthenticated, user } = useAuthenticated();
   // const { data, isPending } = authClient.useSession();
   // const router = useRouter();
   const { workspace: currentWorkspace, setCurrentWorkspace } =
@@ -60,6 +60,8 @@ const DashbaordLayout = ({ children }: { children: React.ReactNode }) => {
   //   );
   // }, [data?.session?.token]);
 
+  // console.log(user);
+
   return (
     <>
       {isLoading || !isAuthenticated || currentWorkspace == undefined ? (
@@ -90,4 +92,4 @@ const DashbaordLayout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default DashbaordLayout;
+export default DashboardLayout;

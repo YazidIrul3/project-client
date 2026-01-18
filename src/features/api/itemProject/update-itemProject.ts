@@ -14,6 +14,7 @@ export const updateItemProjectGroupSchema = z.object({
   startTime: z.string(),
   endTime: z.string(),
   priority: z.string().min(1, "Priority is required"),
+  index: z.int().optional(),
   assignedUsers: z.array(
     object({
       name: z.string().min(1, "Name is required"),

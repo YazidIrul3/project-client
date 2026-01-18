@@ -80,11 +80,10 @@ const DeleteChatChannelSheet = ({
           <div className="flex flex-col w-full">
             <SheetHeader>
               <SheetTitle className="text-red-600 font-bold">
-                Delete Workspace
+                Delete This Chat Channel
               </SheetTitle>
               <SheetDescription>
-                Aksi ini tidak bisa dibatalkan. Ini akan menghapus space Tes dan
-                semua data.
+                Apakah kamu yakin ingin menghapus channel ini ?
               </SheetDescription>
             </SheetHeader>
 

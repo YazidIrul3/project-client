@@ -89,7 +89,8 @@ const ColumnContainerKanban = (props: ColumnContainerKanban) => {
 
         <CreateItemProject
           borderColor={data?.color as string}
-          id={data?.id as string}
+          projectGroupId={data?.id as string}
+          lengthItemProject={itemProjectGroups?.data.length}
         />
       </CardContent>
     </Card>

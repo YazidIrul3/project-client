@@ -7,6 +7,7 @@ export const createProjectGroupSchema = z.object({
   name: z.string().min(1, "Name is required"),
   color: z.string().min(1, "Color is required"),
   projectId: z.uuid(),
+  index: z.int(),
 });
 
 export type CreateProjectGroupSchema = z.infer<typeof createProjectGroupSchema>;

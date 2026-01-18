@@ -47,6 +47,8 @@ export const useCreateWorkspace = (params: useCreateWorkspaceParams) => {
       return createWorkspace(body, params.token);
     },
 
+    retry: false,
+
     onSuccess: (data, Variables, onMutateResult, context) => {
       queryClient.invalidateQueries({ queryKey: getWorkpacesQuery() });
       // setCurrentWorkspace({ userId: Variables.userId, name: Variables.name });

@@ -32,7 +32,10 @@ export const ProjectKanbanView = (props: ProjectKanbanView) => {
         </SortableContext>
       </DndContext>
 
-      <CreateProjectGroupSheet projectId={props.projectId} />
+      <CreateProjectGroupSheet
+        projectId={props.projectId}
+        projectLength={columnId.length}
+      />
     </div>
   );
 };

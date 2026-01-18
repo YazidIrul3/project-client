@@ -60,18 +60,21 @@ export const AppSidebarHeader = ({
 }) => {
   const { workspace: currentWorkspace, setCurrentWorkspace } =
     useCurrentWorkspace();
+  const { setIsLoading } = useLoading();
   const { open } = useSidebar();
   const { token, user } = useAuthenticated();
-  const { data: session } = authClient.useSession();
+  // const { data: session } = authClient.useSession();
   const { data: workspaceByUser, isLoading: workspaceByUserLoading } =
     useGetWorkspacesByUser({
       token: token,
       userId: currentWorkspace.userId,
     });
 
-  const userData = workspaceSidebarData?.workspaceMembers?.filter(
-    (item: WorkspaceMemberEntity) => item.memberId == currentWorkspace.userId
-  );
+  React.useEffect(() => {
+    if (workspaceByUserLoading) setIsLoading(true);
+
+    setIsLoading(false);
+  }, [workspaceByUserLoading]);
 
   return (
     <SidebarHeader className="py-3 flex flex-col gap-4  ">
@@ -348,8 +351,8 @@ export const AppSidebarFooter = () => {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { workspace } = useCurrentWorkspace();
   const { isLoading, setIsLoading } = useLoading();
-  const { token, user } = useAuthenticated();
-  const { open } = useSidebar();
+  const { token } = useAuthenticated();
+  // const { open } = useSidebar();
   // const { data: session } = authClient.useSession();
   const { data: workspaceSidebarData, isLoading: workspaceSidebarDataLoading } =
     useGetWorkspaceSidebar({
