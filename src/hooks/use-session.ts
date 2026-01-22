@@ -3,14 +3,14 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 type Props = {
-  user: User | {};
+  user: User;
   setSession: (data: User) => void;
 };
 
 export const useGetToken = create<Props>()(
   persist(
     (set, get) => ({
-      user: {},
+      user: {} as User,
       setSession: (data: User) => {
         set({ user: data });
       },

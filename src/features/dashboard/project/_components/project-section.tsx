@@ -1,13 +1,16 @@
 import { useGetProject } from "@/features/api/project/get-project";
-import DashbaordLayout from "../../_components/layout";
-import { authClient } from "@/lib/auth-client";
-import { ItemProjectEntity } from "@/types/api/project";
+import DashboardLayout from "../../_components/layout";
+import { authClient } from "@/libs/auth-client";
 import { Button } from "@/components/ui/button";
-import { ItemProjectGroupEntity } from "@/types/api/item-project-group";
 import { ProjectKanbanView } from "./view/kanban/project-kanban";
+import { ItemProjectGroupEntity } from "@/types/api/item-project-group";
+import { ProjectGroupEntity } from "@/types/api/project-group";
+import { useAuthenticated } from "@/hooks/use-authenticated";
+import { useEffect } from "react";
+import { useLoading } from "@/hooks/use-loading";
 
 type ProjectSectionHeaderProps = {
-  data?: ItemProjectEntity;
+  data?: ItemProjectGroupEntity;
 };
 
 const ProjectSectionHeader = (props: ProjectSectionHeaderProps) => {
@@ -18,7 +21,7 @@ const ProjectSectionHeader = (props: ProjectSectionHeaderProps) => {
           Project
         </h1>
         <h1 className=" uppercase font-bold text-slate-900 text-2xl">
-          {props.data?.name}
+          {props.data?.title}
         </h1>
       </div>
     </div>
@@ -27,7 +30,7 @@ const ProjectSectionHeader = (props: ProjectSectionHeaderProps) => {
 
 type ProjectSectionMainProps = {
   projectId: string;
-  projectGroups?: [ItemProjectGroupEntity];
+  projectGroups?: [ProjectGroupEntity];
 };
 
 const ProjectSectionMain = (props: ProjectSectionMainProps) => {
@@ -48,14 +51,22 @@ const ProjectSectionMain = (props: ProjectSectionMainProps) => {
 
 export const ProjectSection = (props: { projectId: string }) => {
   const { data } = authClient.useSession();
+  const { token } = useAuthenticated();
+  const { setIsLoading } = useLoading();
 
-  const { data: project } = useGetProject({
-    token: data?.session.token as string,
+  const { data: project, isLoading: isProjectLoading } = useGetProject({
+    token: token,
     id: props.projectId,
   });
 
+  useEffect(() => {
+    if (isProjectLoading) setIsLoading(true);
+
+    setIsLoading(false);
+  }, [isProjectLoading]);
+
   return (
-    <DashbaordLayout>
+    <DashboardLayout>
       <section className=" min-h-screen max-w-screen overflow-hidden p-5">
         <ProjectSectionHeader data={project?.data} />
 
@@ -66,6 +77,6 @@ export const ProjectSection = (props: { projectId: string }) => {
           />
         </div>
       </section>
-    </DashbaordLayout>
+    </DashboardLayout>
   );
 };

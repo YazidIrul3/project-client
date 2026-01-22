@@ -4,9 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetFooter,
-  SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
@@ -33,49 +31,39 @@ import { Selection } from "@tiptap/extensions";
 import { useEditor } from "@tiptap/react";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node";
-import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
-import { authClient } from "@/lib/auth-client";
+import { handleImageUpload, MAX_FILE_SIZE } from "@/libs/tiptap-utils";
+import { authClient } from "@/libs/auth-client";
 import {
-  createItemProjectGroup,
+  createItemProjectGroupSchema,
+  CreateItemProjectGroupSchema,
   useCreateItemProjectGroup,
 } from "@/features/api/itemProject/create-itemProjectGroup";
-import React, { useState } from "react";
 import { DateTimePicker } from "@/components/shared/datetime-picker";
-import { ItemProjectGroupBodyRequest } from "../../../../../types/api/item-project-group";
 import { SelectPriority } from "@/components/shared/select-priority";
 import { SelectAssigned } from "@/components/shared/select-assigned";
 import SheetSideBackground from "../../../_components/sheets/sheet-side-background";
 import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 type CreateItemProjectProps = {
   id: string;
   borderColor: string;
 };
 
-const CreateItemProject = (props: CreateItemProjectProps) => {
-  const form = useForm();
+const CreateItemProject = ({
+  projectGroupId,
+  borderColor,
+  lengthItemProject,
+}: {
+  projectGroupId: string;
+  borderColor: string;
+  lengthItemProject: number;
+}) => {
   const { data } = authClient.useSession();
-  const [bodyRequest, setBodyRequest] = useState<ItemProjectGroupBodyRequest>({
-    title: "",
-    description: "",
-    projectGroupId: props.id,
-    startDate: new Date(),
-    endDate: new Date(),
-    startTime: "07:00",
-    endTime: "07:00",
-    priority: "LOW",
-    assignedUsers: [
-      {
-        name: data?.user.name as string,
-        id: data?.user.id as string,
-        email: data?.user.email as string,
-      },
-    ],
-  });
   const { mutate: CreateItemProjectMutate } = useCreateItemProjectGroup({
     token: authClient.useSession().data?.session.token as string,
     mutationConfig: {
-      onSuccess: (data) => {
+      onSuccess: () => {
         toast.success("Create Item Project Success");
 
         window.location.reload();
@@ -120,38 +108,13 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
       }),
     ],
   });
-  const { formState, control, handleSubmit } = form;
-
-  const handleOnChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { value, name } = e.target;
-
-    setBodyRequest((prev) => {
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
-  };
-
-  const handleOnSubmit = () => {
-    CreateItemProjectMutate({
-      title: bodyRequest.title,
-      endDate: bodyRequest.endDate,
-      startDate: bodyRequest.startDate,
-      startTime: bodyRequest.startTime,
-      endTime: bodyRequest.endTime,
-      priority: bodyRequest.priority,
-      projectGroupId: bodyRequest.projectGroupId,
-      description: editor?.getHTML() as string,
-      assignedUsers: bodyRequest?.assignedUsers as any,
-    });
-
-    setBodyRequest({
+  const form = useForm<CreateItemProjectGroupSchema>({
+    mode: "onChange",
+    resolver: zodResolver(createItemProjectGroupSchema),
+    defaultValues: {
       title: "",
       description: "",
-      projectGroupId: props.id,
+      projectGroupId,
       startDate: new Date(),
       endDate: new Date(),
       startTime: "07:00",
@@ -159,11 +122,26 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
       priority: "LOW",
       assignedUsers: [
         {
-          name: data?.user.name as string,
-          id: data?.user.id as string,
-          email: data?.user.email as string,
+          name: data?.user.name,
+          id: data?.user.id,
+          email: data?.user.email,
         },
       ],
+    },
+  });
+  const { control, getValues } = form;
+
+  const handleOnSubmit = () => {
+    CreateItemProjectMutate({
+      title: getValues("title"),
+      endDate: getValues("endDate"),
+      startDate: getValues("startDate"),
+      startTime: getValues("startTime"),
+      endTime: getValues("endTime"),
+      priority: getValues("priority"),
+      projectGroupId: getValues("projectGroupId"),
+      description: editor?.getHTML() as string,
+      assignedUsers: getValues("assignedUsers"),
     });
   };
 
@@ -172,7 +150,7 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
       <SheetTrigger
         asChild
         style={{
-          borderColor: props.borderColor || "gray",
+          borderColor: borderColor || "gray",
         }}
         className=" min-w-full border-dashed border-2 z-40"
       >
@@ -192,15 +170,14 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
                   <FormItem>
                     <FormControl>
                       <input
+                        {...field}
                         placeholder="Title Item"
                         name="title"
-                        onChange={(e) => {
-                          field.onChange(e);
-                          handleOnChange(e);
-                        }}
                         className=" placeholder-shown:text-3xl font-bold text-3xl focus:outline-none shadow-none"
                       />
                     </FormControl>
+
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -219,13 +196,7 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
                           <h1 className=" text-sm">Start Date</h1>
                         </FormLabel>
                         <FormControl className="">
-                          <DateTimePicker
-                            onChange={(e) => {
-                              field.onChange(e);
-                              handleOnChange(e);
-                            }}
-                            name="start"
-                          />
+                          <DateTimePicker {...field} name="start" />
                         </FormControl>
 
                         <FormMessage />
@@ -246,14 +217,9 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
                         </FormLabel>
                         <FormControl className="  w-full">
                           <SelectAssigned
-                            assignedData={bodyRequest?.assignedUsers}
+                            {...field}
+                            assignedData={getValues("assignedUsers")}
                             name="assignedUsers"
-                            onChange={(value) => {
-                              field.onChange(value);
-                              handleOnChange({
-                                target: { name: "assignedUsers", value },
-                              } as any);
-                            }}
                           />
                         </FormControl>
 
@@ -266,7 +232,7 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
                 <div className=" flex flex-col justify-start items-start  min-h-full">
                   <FormField
                     control={control}
-                    name="timezone"
+                    name="endDate"
                     render={({ field }) => (
                       <FormItem className=" w-full flex flex-row gap-3 justify-center items-center">
                         <FormLabel className=" flex flex-row items-center gap-2 min-w-[120px]">
@@ -274,7 +240,7 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
                           <h1 className=" text-sm">Due Date</h1>
                         </FormLabel>
                         <FormControl className="">
-                          <DateTimePicker name="start" />
+                          <DateTimePicker {...field} name="endDate" />
                         </FormControl>
 
                         <FormMessage />
@@ -294,14 +260,7 @@ const CreateItemProject = (props: CreateItemProjectProps) => {
                           Priority
                         </FormLabel>
                         <FormControl className="  w-full">
-                          <SelectPriority
-                            onChange={(value) => {
-                              field.onChange(value);
-                              handleOnChange({
-                                target: { name: "priority", value },
-                              } as any);
-                            }}
-                          />
+                          <SelectPriority {...field} />
                         </FormControl>
 
                         <FormMessage />

@@ -9,14 +9,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -25,78 +17,60 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useSidebar } from "@/components/ui/sidebar";
-import { Plus, SettingsIcon } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useForm } from "react-hook-form";
-import SheetSideBackground from "./sheet-side-background";
-import { useCreateProject } from "@/features/api/project/create-project";
-import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
+import SheetSideBackground from "../../../_components/sheets/sheet-side-background";
+import { authClient } from "@/libs/auth-client";
 import { toast } from "sonner";
-import { ProjectBodyRequest } from "@/types/api/project";
-import { useGetWorkspace } from "@/features/api/workspace/get-workspace";
-import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
-import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
 import { Card } from "@/components/ui/card";
-import { ProjectGroupBodyRequest } from "@/types/api/project-group";
 import { ProjectGroupColors } from "@/helpers/color";
-import { useCreateProjectGroup } from "@/features/api/projectGroup/create-projectGroup";
-import { create } from "domain";
+import {
+  createProjectGroupSchema,
+  CreateProjectGroupSchema,
+  useCreateProjectGroup,
+} from "@/features/api/projectGroup/create-projectGroup";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 type CreateProjectGroupSheetProps = {
   projectId: string;
 };
 
-const CreateProjectGroupSheet = (props: CreateProjectGroupSheetProps) => {
-  const form = useForm();
-  const { control } = form;
-  const { data } = authClient.useSession();
-  const [bodyRequest, setBodyRequest] = useState<ProjectGroupBodyRequest>({
-    name: "",
-    color: ProjectGroupColors[0].value,
-    projectId: props.projectId,
+const CreateProjectGroupSheet = ({
+  projectId,
+  projectLength,
+}: {
+  projectId: string;
+  projectLength: number;
+}) => {
+  const form = useForm<CreateProjectGroupSchema>({
+    resolver: zodResolver(createProjectGroupSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+      color: ProjectGroupColors[0].value,
+      projectId: projectId,
+    },
   });
-
-  const handleOnChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-
-    setBodyRequest((prev) => {
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
-  };
+  const { control, getValues, setValue } = form;
+  const { data } = authClient.useSession();
 
   const { mutate: createProjectGroupMutation } = useCreateProjectGroup({
     token: data?.session.token as string,
     mutationConfig: {
-      onSuccess: (data) => {
+      onSuccess: () => {
         toast.success("Project Group created successfully");
 
         window.location.reload();
-      },
-      onError: (error: any) => {
-        toast.error(
-          error?.response?.data?.message || "Failed to create Project Group"
-        );
       },
     },
   });
 
   const handleOnSubmit = () => {
     createProjectGroupMutation({
-      color: bodyRequest.color as string,
-      name: bodyRequest.name as string,
-      projectId: props.projectId,
-    });
-
-    setBodyRequest({
-      name: "",
-      color: ProjectGroupColors[0].value,
-      projectId: props.projectId,
+      color: getValues("color"),
+      name: getValues("name"),
+      projectId: getValues("projectId"),
+      index: projectLength,
     });
   };
 
@@ -137,14 +111,13 @@ const CreateProjectGroupSheet = (props: CreateProjectGroupSheetProps) => {
                     <FormLabel className=" mb-2">Project Name</FormLabel>
                     <FormControl>
                       <Input
+                        {...field}
                         placeholder="Type Project name"
                         name="name"
-                        onChange={(e) => {
-                          field.onChange(e);
-                          handleOnChange(e);
-                        }}
                       />
                     </FormControl>
+
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -152,23 +125,19 @@ const CreateProjectGroupSheet = (props: CreateProjectGroupSheetProps) => {
               <FormField
                 control={control}
                 name="color"
-                render={({ field }) => (
+                render={({}) => (
                   <FormItem>
                     <FormLabel>Group Color</FormLabel>
                     <div className=" flex flex-row items-center gap-3">
                       {ProjectGroupColors.map((item, i: number) => (
                         <div
                           key={i}
-                          onClick={() =>
-                            setBodyRequest({
-                              color: item.value,
-                            })
-                          }
+                          onClick={() => setValue("color", item.value)}
                           style={{
                             backgroundColor: `${item.value}`,
                           }}
                           className={` flex flex-row gap-3 items-center w-[35px] h-[35px] rounded-full ${
-                            bodyRequest.color == item.value
+                            getValues("color") == item.value
                               ? "outline-2 outline-black"
                               : "outline-none"
                           }`}

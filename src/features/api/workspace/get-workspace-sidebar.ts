@@ -1,5 +1,6 @@
-import { axiosInstance } from "@/lib/axios";
-import { QueryConfig } from "@/lib/react-query";
+import { useAuthenticated } from "@/hooks/use-authenticated";
+import { axiosInstance } from "@/libs/axios";
+import { QueryConfig } from "@/libs/react-query";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 type GetWorkspaceSidebarProps = {
@@ -48,7 +49,10 @@ type useGetWorkspace = {
 };
 
 export const useGetWorkspaceSidebar = (params: useGetWorkspace) => {
+  const { isAuthenticated } = useAuthenticated();
+
   return useQuery({
+    enabled: isAuthenticated,
     ...getWorkspaceSidebarQueryOptions({
       token: params.token,
       userId: params.userId,

@@ -6,22 +6,30 @@ import { Label } from "@radix-ui/react-label";
 import Image from "next/image";
 import { GoogleLogoIcon } from "@phosphor-icons/react";
 import { useLoginForm } from "../_hooks/useLoginForm";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/libs/auth-client";
 import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-workspace";
+import { useLoading } from "@/hooks/use-loading";
+import { useCreateWorkspace } from "@/features/api/workspace/create-workspace";
+import { useAuthenticated } from "@/hooks/use-authenticated";
 
 export const LoginForm = () => {
   const { onSubmit } = useLoginForm();
-  const { data } = authClient.useSession();
+  const { data: data } = authClient.useSession();
   const { setCurrentWorkspace } = useCurrentWorkspace();
+  const { setIsLoading } = useLoading();
+  const { mutate: createWorkspaceMutation, isPending: createWorkspaceLoading } =
+    useCreateWorkspace({
+      token: data?.session.token,
+    });
+  const { onLogin, isAuthenticated } = useAuthenticated();
 
   const handleOnSubmit = () => {
-    onSubmit();
+    setIsLoading(true);
 
-    setCurrentWorkspace({
-      name: `${data?.user.name}'s Space`,
-      userId: data?.user.id as string,
-    });
+    onSubmit();
   };
+
+  console.log(isAuthenticated);
 
   return (
     <div className=" flex flex-col gap-7 justify-center items-center w-full max-w-sm">

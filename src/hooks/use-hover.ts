@@ -1,4 +1,4 @@
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/libs/auth-client";
 import { boolean, email } from "zod";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";

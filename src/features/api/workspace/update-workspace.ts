@@ -1,16 +1,15 @@
-import { axiosInstance } from "@/lib/axios";
-import { MutationConfig } from "@/lib/react-query";
+import { axiosInstance } from "@/libs/axios";
+import { MutationConfig } from "@/libs/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import z, { string } from "zod";
-import { User } from "better-auth";
 import { getWorkpacesQuery } from "./get-workspaces";
+import z from "zod";
 
-const updatWorkspaceSchemaSchema = z.object({
+export const updatWorkspaceSchema = z.object({
   name: z.string().min(1, "Name is required"),
   timezone: z.string("Timezone must be string"),
 });
 
-export type UpdatWorkspaceSchema = z.infer<typeof updatWorkspaceSchemaSchema>;
+export type UpdatWorkspaceSchema = z.infer<typeof updatWorkspaceSchema>;
 
 export const updatWorkspace = async (
   data: UpdatWorkspaceSchema,
@@ -39,6 +38,7 @@ export const useUpdatWorkspace = (params: UseUpdatWorkspaceOptions) => {
 
   return useMutation({
     ...params.mutationConfig,
+  
 
     mutationFn: (body: UpdatWorkspaceSchema) => {
       return updatWorkspace(body, params.token, params.id);

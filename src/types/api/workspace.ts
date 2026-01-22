@@ -15,3 +15,26 @@ export type WorkspaceupdateEntity = {
   avatar?: string;
   timezone?: string;
 };
+
+export type WorkspaceMemberEntity = Entity<{
+  id: string;
+  member: UserEntity;
+  memberId: string;
+  role: string;
+}>;
+
+export type WorkspaceTypeEntity = Entity<{
+  name: string;
+  description: string;
+}>;
+
+export type WorkspaceSidebarEntity = {
+  name: string;
+  avatar: string;
+  id: string;
+  timezone: string;
+  workspaceMember: [];
+  user: UserEntity;
+  workspaceType: WorkspaceTypeEntity;
+  workspaceMembers: WorkspaceMemberEntity[];
+};

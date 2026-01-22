@@ -1,15 +1,15 @@
-import { axiosInstance } from "@/lib/axios";
-import { MutationConfig, queryClient } from "@/lib/react-query";
+import { axiosInstance } from "@/libs/axios";
+import { MutationConfig, queryClient } from "@/libs/react-query";
 import { useMutation } from "@tanstack/react-query";
 import z from "zod";
 import { getWorkpacesQuery } from "./get-workspaces";
 import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-workspace";
 
-const createWorkspaceInputSchema = z.object({
+export const createWorkspaceInputSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  userId: z.string().min(9, "Number phone need to have 9 digits or more"),
-  timezone: z.string("Timezone must be string"),
-  avatar: z.string("Timezone must be string"),
+  userId: z.string().min(1, "User Id is required"),
+  timezone: z.string("Timezone must be string").optional(),
+  avatar: z.string("Timezone must be string").optional(),
   workspaceTypeName: z.string("Timezone must be string"),
 });
 
@@ -19,7 +19,7 @@ export type CreateWorkspaceInputSchema = z.infer<
 
 export const createWorkspace = async (
   body: CreateWorkspaceInputSchema,
-  token?: string
+  token?: string,
 ) => {
   try {
     const response = await axiosInstance.post("/workspace/", body, {
@@ -40,14 +40,14 @@ type useCreateWorkspaceParams = {
 };
 
 export const useCreateWorkspace = (params: useCreateWorkspaceParams) => {
-  const { setCurrentWorkspace } = useCurrentWorkspace();
-
   return useMutation({
     ...params.mutationConfig,
 
     mutationFn: (body: CreateWorkspaceInputSchema) => {
       return createWorkspace(body, params.token);
     },
+
+    retry: false,
 
     onSuccess: (data, Variables, onMutateResult, context) => {
       queryClient.invalidateQueries({ queryKey: getWorkpacesQuery() });
@@ -57,7 +57,7 @@ export const useCreateWorkspace = (params: useCreateWorkspaceParams) => {
         data,
         Variables,
         onMutateResult,
-        context
+        context,
       );
     },
   });

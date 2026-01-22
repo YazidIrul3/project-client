@@ -7,7 +7,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/libs/auth-client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
@@ -54,7 +54,7 @@ const DeleteItemProjectGroupSheet = (props: DeleteItemProjectGroupSheet) => {
           <p className="  font-semibold">Delete</p>
         </div>
       </SheetTrigger>
-      
+
       <SheetContent className=" flex flex-row justify-center items-center max-w-[550px]  h-fit translate-x-[-50%] translate-y-[-50%] left-1/2 top-1/2 rounded-xl ">
         <Form {...form}>
           <div className="flex flex-col w-full">
@@ -63,7 +63,7 @@ const DeleteItemProjectGroupSheet = (props: DeleteItemProjectGroupSheet) => {
                 Delete Item Project Group
               </SheetTitle>
               <SheetDescription>
-                Warning! If you delete this, that will deletes all data what's
+                Warning! If you delete this, that will deletes all data what is
                 have relation with it
               </SheetDescription>
             </SheetHeader>

@@ -1,4 +1,4 @@
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/libs/auth-client";
 import { email } from "zod";
 import { create } from "zustand";
 
@@ -13,7 +13,7 @@ type UseAssignedProps = {
   setAssigned: () => void;
 };
 
-export const useAssigned = create((set, get) => {
+export const useAssigned = create((set) => {
   const { data } = authClient.useSession();
 
   assigned: [

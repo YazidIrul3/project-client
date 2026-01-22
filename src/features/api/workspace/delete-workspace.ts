@@ -1,5 +1,5 @@
-import { axiosInstance } from "@/lib/axios";
-import { MutationConfig, queryClient } from "@/lib/react-query";
+import { axiosInstance } from "@/libs/axios";
+import { MutationConfig, queryClient } from "@/libs/react-query";
 import { getWorkpacesQuery } from "./get-workspaces";
 import { useMutation } from "@tanstack/react-query";
 import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-workspace";

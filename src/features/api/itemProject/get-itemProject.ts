@@ -1,10 +1,11 @@
-import { axiosInstance } from "@/lib/axios";
-import { QueryConfig } from "@/lib/react-query";
+import { useAuthenticated } from "@/hooks/use-authenticated";
+import { axiosInstance } from "@/libs/axios";
+import { QueryConfig } from "@/libs/react-query";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 export const getItemProjectGroupByProjectGroupId = async (
   projectGroupId: string,
-  token: string
+  token: string,
 ) => {
   const response = await axiosInstance.get(
     `/itemProjectGroup/${projectGroupId}`,
@@ -12,19 +13,19 @@ export const getItemProjectGroupByProjectGroupId = async (
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;
 };
 
 export const getItemProjectGroupByProjectGroupIdQuery = (
-  projectGroupId: string
+  projectGroupId: string,
 ) => ["itemProjectGroup", projectGroupId];
 
 export const getItemProjectGroupByProjectGroupIdQueryOptions = (
   projectGroupId: string,
-  token: string
+  token: string,
 ) => {
   return queryOptions({
     queryKey: getItemProjectGroupByProjectGroupIdQuery(projectGroupId),
@@ -41,12 +42,15 @@ type useGetItemProjectGroupByProjectGroupId = {
 };
 
 export const useGetItemProjectGroupByProjectGroupId = (
-  params: useGetItemProjectGroupByProjectGroupId
+  params: useGetItemProjectGroupByProjectGroupId,
 ) => {
+  const { isAuthenticated } = useAuthenticated();
+
   return useQuery({
+    enabled: isAuthenticated,
     ...getItemProjectGroupByProjectGroupIdQueryOptions(
       params.projectGroupId,
-      params.token
+      params.token,
     ),
     ...params.queryConfig,
   });

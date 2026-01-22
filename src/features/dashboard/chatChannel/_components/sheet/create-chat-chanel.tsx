@@ -10,115 +10,96 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  createWorkspace,
-  useCreateWorkspace,
-} from "@/features/api/workspace/create-workspace";
-import {
-  CreateWorkspaceSchema,
-  createWorkspaceSchema,
-} from "@/features/schema/workspace";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/libs/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus } from "lucide-react";
-import React, { useState } from "react";
+import { LockKeyhole, Plus } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { useSheet } from "@/hooks/use-sheet";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  createChatChannelSchema,
+  CreateChatChannelSchema,
+  useCreateChatChannel,
+} from "@/features/api/chatChannel/create-chatChannel";
+import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-workspace";
+import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
 
 const CreateChatChanneleSheet = () => {
   const { data } = authClient.useSession();
-  const router = useRouter();
+  const { workspace: currentWorkspace } = useCurrentWorkspace();
+  const [checked, setChecked] = useState<boolean>(false);
   const token = data?.session.token;
-  const form = useForm<CreateWorkspaceSchema>({
-    resolver: zodResolver(createWorkspaceSchema),
-    mode: "onChange",
+
+  const {
+    data: workspaceByNameAndUserId,
+    isLoading: workspaceSidebarDataLoading,
+  } = useGetWorkspaceSidebar({
+    token: token as string,
+    userId: currentWorkspace.userId,
+    workspaceName: currentWorkspace.name,
+    queryConfig: {
+      enabled: !!token && !!currentWorkspace.userId && !!currentWorkspace.name,
+    },
   });
-  const { mutate: createWorkspaceMutation } = useCreateWorkspace({
-    token,
+  const { mutate: createChatChannelMutation } = useCreateChatChannel({
+    token: token as string,
     mutationConfig: {
       onSuccess: () => {
-        toast.success("Workspace created successfully");
-        closeSheet();
+        toast.success("Chat Channel created successfully");
+
+        window.location.reload();
       },
     },
   });
-  const [bodyRequest, setBodyRequest] = useState<CreateWorkspaceSchema>({
-    name: "",
-    avatar: "",
-    timezone: "",
-    userId: "",
-    workspaceTypeName: "team",
+
+  const form = useForm<CreateChatChannelSchema>({
+    resolver: zodResolver(createChatChannelSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+      description: "",
+      type: checked ? "private" : "general",
+      workspaceId: workspaceByNameAndUserId?.id,
+      chatChannelMembers: [
+        {
+          memberId: currentWorkspace?.userId,
+        },
+      ],
+    },
   });
-  const { control } = form;
-  const { open, openSheet, setOpen, closeSheet } = useSheet();
-
-  const handleOnChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { value, name } = e.target;
-
-    setBodyRequest((prev) => {
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
-  };
+  const { control, getValues } = form;
+  const { open, setOpen } = useSheet();
 
   const handleOnSubmit = () => {
-    createWorkspaceMutation({
-      avatar: "Tes",
-      name: bodyRequest.name,
-      workspaceTypeName: bodyRequest.workspaceTypeName,
-      timezone: bodyRequest.timezone,
-      userId: data?.user?.id!,
-    });
-
-    setBodyRequest({
-      name: "",
-      avatar: "",
-      timezone: "",
-      userId: "",
-      workspaceTypeName: "team",
+    createChatChannelMutation({
+      name: getValues("name"),
+      description: getValues("description"),
+      type: checked ? "private" : "general",
+      workspaceId: workspaceByNameAndUserId?.id,
+      chatChannelMembers: getValues("chatChannelMembers"),
     });
   };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger
-        asChild
-        className=" justify-start flex font-normal text-sm px-2 py-2"
-      >
-        <Button
-          variant={"ghost"}
-          onClick={openSheet}
-          className=" justify-start flex font-normal text-sm px-2"
-        >
-          <Plus size={16} />
-        </Button>
+      <SheetTrigger asChild className=" w-fit font-normal text-sm px-2 py-2">
+        <div className=" w-fit">
+          <Plus size={16} className=" w-fit h-fit" />
+        </div>
       </SheetTrigger>
       <div className="min-w-full mx-auto h-full p-2">
-        <SheetContent className=" flex flex-row justify-between h-11/12   rounded-xl translate-x-[-50%] translate-y-[-50%] left-1/2 top-1/2">
+        <SheetContent className=" flex flex-row justify-between h-fit   rounded-xl translate-x-[-50%] translate-y-[-50%] left-1/2 top-1/2">
           <Form {...form}>
             <div className=" flex flex-col w-full ">
               <SheetHeader className=" mb-3">
@@ -136,52 +117,11 @@ const CreateChatChanneleSheet = () => {
                       <FormLabel className=" mb-2">Channel Name</FormLabel>
                       <FormControl>
                         <Input
+                          {...field}
                           placeholder="new-channel"
                           name="name"
-                          onChange={(e) => {
-                            field.onChange(e);
-                            handleOnChange(e);
-                          }}
                         />
                       </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={control}
-                  name="workspaceTypeName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className=" mb-2">Workspace Type</FormLabel>
-                      <FormControl className=" lg:w-9/12 w-full">
-                        <Select
-                          defaultValue="Team"
-                          name="workspaceTypeName"
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            handleOnChange({
-                              target: { name: "workspaceTypeName", value },
-                            } as any);
-                          }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue
-                              defaultValue={"Team"}
-                              placeholder="Select a Workspace Type"
-                            />
-                          </SelectTrigger>
-
-                          <SelectContent onChange={field.onChange}>
-                            <SelectGroup>
-                              <SelectItem value="Team">Team</SelectItem>
-                              <SelectItem value="Organization">
-                                Organization
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
 
                       <FormMessage />
                     </FormItem>
@@ -190,35 +130,44 @@ const CreateChatChanneleSheet = () => {
 
                 <FormField
                   control={control}
-                  name="timezone"
+                  name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className=" mb-2">Timezone</FormLabel>
-                      <FormControl className=" lg:w-9/12 w-full">
-                        <Select
-                          name="timezone"
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            handleOnChange({
-                              target: { name: "timezone", value },
-                            } as any);
-                          }}
-                        >
-                          <SelectTrigger value={"tes"}>
-                            <SelectValue placeholder="Select a timezone" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectItem value="est">EST</SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
+                      <FormLabel className=" mb-2">Description</FormLabel>
+                      <FormControl className=" w-full">
+                        <Textarea
+                          {...field}
+                          placeholder="Description"
+                          name="description"
+                          className=" w-full"
+                        />
                       </FormControl>
 
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
+                <div className=" flex flex-row items-center gap-2">
+                  <div className=" flex flex-col gap-1">
+                    <div className=" flex flex-row items-center gap-2">
+                      <LockKeyhole size={18} strokeWidth={"3px"} />
+                      <h1 className=" font-bold">Private Channel</h1>
+                    </div>
+
+                    <p className=" text-sm text-slate-700">
+                      Only selected members and roles will be able to view this
+                      channel
+                    </p>
+                  </div>
+
+                  <div>
+                    <Switch
+                      checked={checked}
+                      onClick={() => setChecked(!checked)}
+                    />
+                  </div>
+                </div>
               </div>
 
               <SheetFooter className="flex justify-end flex-row">

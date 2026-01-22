@@ -1,4 +1,5 @@
-import { axiosInstance } from "@/lib/axios";
+import { useAuthenticated } from "@/hooks/use-authenticated";
+import { axiosInstance } from "@/libs/axios";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 export const getLogin = async () => {
@@ -17,7 +18,10 @@ const getLoginQueryOptions = () => {
 };
 
 export const useGetSession = () => {
+  const { isAuthenticated } = useAuthenticated();
+
   return useQuery({
+    enabled: isAuthenticated,
     ...getLoginQueryOptions(),
   });
 };

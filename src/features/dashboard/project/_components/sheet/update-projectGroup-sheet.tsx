@@ -9,14 +9,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -25,18 +17,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useSidebar } from "@/components/ui/sidebar";
-import { Plus, SettingsIcon } from "lucide-react";
+import { SettingsIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
-import SheetSideBackground from "./sheet-side-background";
-import { useCreateProject } from "@/features/api/project/create-project";
-import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
+import SheetSideBackground from "../../../_components/sheets/sheet-side-background";
+import { authClient } from "@/libs/auth-client";
 import { toast } from "sonner";
-import { ProjectBodyRequest } from "@/types/api/project";
-import { useGetWorkspace } from "@/features/api/workspace/get-workspace";
-import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
-import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
 import {
   Card,
   CardDescription,
@@ -44,67 +29,54 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ProjectGroupBodyRequest } from "@/types/api/project-group";
 import { ProjectGroupColors } from "@/helpers/color";
-import { useCreateProjectGroup } from "@/features/api/projectGroup/create-projectGroup";
 import DeleteProjectGroupSheet from "./delete-projectGroup-sheet";
-import { useUpdateProjectGroup } from "@/features/api/projectGroup/update-project";
-import { ItemProjectGroupEntity } from "@/types/api/item-project-group";
+import {
+  updateProjectGroupSchema,
+  UpdateProjectGroupSchema,
+  useUpdateProjectGroup,
+} from "@/features/api/projectGroup/update-project";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ProjectGroupEntity } from "@/types/api/project-group";
 
 type UpdateProjectGroupSheetProps = {
   id: string;
-  data: ItemProjectGroupEntity | any;
+  data: ProjectGroupEntity;
 };
 
 const UpdateProjectGroupSheet = (props: UpdateProjectGroupSheetProps) => {
-  const form = useForm();
-  const { control } = form;
-  const { data } = authClient.useSession();
-  const [bodyRequest, setBodyRequest] = useState<ProjectGroupBodyRequest>({
-    name: props.data.name,
-    color: props.data.color,
-    projectId: props.data.projectId,
+  const form = useForm<UpdateProjectGroupSchema>({
+    resolver: zodResolver(updateProjectGroupSchema),
+    mode: "onChange",
+    defaultValues: {
+      color: props.data.color,
+      name: props.data.name,
+    },
   });
-
-  const handleOnChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-
-    setBodyRequest((prev) => {
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
-  };
+  const { control, getValues, setValue } = form;
+  const { data } = authClient.useSession();
 
   const { mutate: updateProjectGroupMutation } = useUpdateProjectGroup({
     token: data?.session.token as string,
     id: props.id,
     mutationConfig: {
-      onSuccess: (data) => {
+      onSuccess: () => {
         toast.success("Project Group updated successfully");
 
         window.location.reload();
       },
-      onError: (error: any) => {
-        toast.error(
-          error?.response?.data?.message || "Failed to update Project Group"
-        );
-      },
+      // onError: (error: any) => {
+      //   toast.error(
+      //     error?.response?.data?.message || "Failed to update Project Group"
+      //   );
+      // },
     },
   });
 
   const handleOnSubmit = () => {
     updateProjectGroupMutation({
-      color: bodyRequest.color as string,
-      name: bodyRequest.name as string,
-    });
-
-    setBodyRequest({
-      name: props.data.name,
-      color: props.data.color,
+      color: getValues("color"),
+      name: getValues("name"),
     });
   };
 
@@ -137,15 +109,13 @@ const UpdateProjectGroupSheet = (props: UpdateProjectGroupSheetProps) => {
                     <FormLabel className=" mb-2">Project Name</FormLabel>
                     <FormControl>
                       <Input
+                        {...field}
                         placeholder="Type Project name"
                         name="name"
-                        value={bodyRequest.name}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          handleOnChange(e);
-                        }}
                       />
                     </FormControl>
+
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -153,23 +123,19 @@ const UpdateProjectGroupSheet = (props: UpdateProjectGroupSheetProps) => {
               <FormField
                 control={control}
                 name="color"
-                render={({ field }) => (
+                render={({}) => (
                   <FormItem>
                     <FormLabel>Group Color</FormLabel>
                     <div className=" flex flex-row items-center gap-3">
                       {ProjectGroupColors.map((item, i: number) => (
                         <div
                           key={i}
-                          onClick={() =>
-                            setBodyRequest({
-                              color: item.value,
-                            })
-                          }
+                          onClick={() => setValue("color", item.value)}
                           style={{
                             backgroundColor: `${item.value}`,
                           }}
                           className={` flex flex-row gap-3 items-center w-[35px] h-[35px] rounded-full ${
-                            bodyRequest.color == item.value
+                            getValues("color") == item.value
                               ? "outline-2 outline-black"
                               : "outline-none"
                           }`}

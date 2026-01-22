@@ -1,13 +1,12 @@
-import { axiosInstance } from "@/lib/axios";
-import { MutationConfig } from "@/lib/react-query";
+import { axiosInstance } from "@/libs/axios";
+import { MutationConfig } from "@/libs/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import z, { string } from "zod";
 import { User } from "better-auth";
 import { getProjectQuery } from "./create-project";
 
-const updateProjectSchema = z.object({
+export const updateProjectSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  // timezone: z.string("Timezone must be string"),
 });
 
 export type UpdateProjectSchema = z.infer<typeof updateProjectSchema>;

@@ -1,6 +1,7 @@
 import { Entity } from "./api";
+import { ProjectGroupEntity } from "./project-group";
 
-export type ItemProjectEntity = Entity<{
+export type ProjectEntity = Entity<{
   name: string;
   description: string;
   startDate: Date;
@@ -8,6 +9,7 @@ export type ItemProjectEntity = Entity<{
   startTime: Date;
   endTime: Date;
   priority: string;
+  projectGroups: ProjectGroupEntity[];
 }>;
 
 export type ProjectBodyRequest = {

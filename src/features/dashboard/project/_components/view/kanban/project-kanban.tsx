@@ -1,5 +1,5 @@
 import { ItemProjectGroupEntity } from "@/types/api/item-project-group";
-import CreateProjectGroupSheet from "@/features/dashboard/_components/sheets/create-projectGroup-sheet ";
+import CreateProjectGroupSheet from "@/features/dashboard/project/_components/sheet/create-projectGroup-sheet ";
 import ColumnContainerKanban from "./column-kanban";
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
@@ -8,7 +8,7 @@ import { ProjectGroupEntity } from "@/types/api/project-group";
 
 type ProjectKanbanView = {
   projectId: string;
-  projectGroups?: [ItemProjectGroupEntity];
+  projectGroups?: ProjectGroupEntity[];
 };
 
 export const ProjectKanbanView = (props: ProjectKanbanView) => {
@@ -26,13 +26,16 @@ export const ProjectKanbanView = (props: ProjectKanbanView) => {
     >
       <DndContext>
         <SortableContext items={columnId}>
-          {props.projectGroups?.map((group: any) => (
+          {props.projectGroups?.map((group: ProjectGroupEntity) => (
             <ColumnContainerKanban key={group.id} data={group} />
           ))}
         </SortableContext>
       </DndContext>
 
-      <CreateProjectGroupSheet projectId={props.projectId} />
+      <CreateProjectGroupSheet
+        projectId={props.projectId}
+        projectLength={columnId.length}
+      />
     </div>
   );
 };

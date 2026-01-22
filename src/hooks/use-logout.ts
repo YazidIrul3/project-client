@@ -1,10 +1,12 @@
-import { axiosInstance } from "@/lib/axios";
-import { authClient } from "@/lib/auth-client";
+import { axiosInstance } from "@/libs/axios";
+import { authClient } from "@/libs/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useAuthenticated } from "./use-authenticated";
 
 export const useLogout = () => {
   const router = useRouter();
+  const { onLogout } = useAuthenticated();
 
   const onClick = async () => {
     try {
@@ -13,6 +15,7 @@ export const useLogout = () => {
           onSuccess: () => {
             toast.success("Logout successful!");
 
+            onLogout();
             router.push("/login");
           },
 
