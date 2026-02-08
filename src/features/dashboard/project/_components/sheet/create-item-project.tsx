@@ -18,21 +18,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
-import { StarterKit } from "@tiptap/starter-kit";
-import { Image } from "@tiptap/extension-image";
-import { TaskItem, TaskList } from "@tiptap/extension-list";
-import { TextAlign } from "@tiptap/extension-text-align";
-import { Typography } from "@tiptap/extension-typography";
-import { Highlight } from "@tiptap/extension-highlight";
-import { Subscript } from "@tiptap/extension-subscript";
-import { Superscript } from "@tiptap/extension-superscript";
-import { Selection } from "@tiptap/extensions";
-import { useEditor } from "@tiptap/react";
-import HorizontalRule from "@tiptap/extension-horizontal-rule";
-import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node";
-import { handleImageUpload, MAX_FILE_SIZE } from "@/libs/tiptap-utils";
-import { authClient } from "@/libs/auth-client";
 import {
   createItemProjectGroupSchema,
   CreateItemProjectGroupSchema,
@@ -44,6 +29,8 @@ import { SelectAssigned } from "@/components/shared/select-assigned";
 import SheetSideBackground from "../../../_components/sheets/sheet-side-background";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuthenticated } from "@/hooks/use-authenticated";
+import { WYSIWYGTextEditor } from "../../../../../components/shared/text-editor";
 
 type CreateItemProjectProps = {
   id: string;
@@ -59,9 +46,9 @@ const CreateItemProject = ({
   borderColor: string;
   lengthItemProject: number;
 }) => {
-  const { data } = authClient.useSession();
+  const { token, user } = useAuthenticated();
   const { mutate: CreateItemProjectMutate } = useCreateItemProjectGroup({
-    token: authClient.useSession().data?.session.token as string,
+    token: token,
     mutationConfig: {
       onSuccess: () => {
         toast.success("Create Item Project Success");
@@ -70,44 +57,44 @@ const CreateItemProject = ({
       },
     },
   });
-  const editor = useEditor({
-    immediatelyRender: false,
-    editorProps: {
-      attributes: {
-        autocomplete: "off",
-        autocorrect: "off",
-        autocapitalize: "off",
-        "aria-label": "Main content area, start typing to enter text.",
-        class: "simple-editor",
-      },
-    },
-    extensions: [
-      StarterKit.configure({
-        horizontalRule: false,
-        link: {
-          openOnClick: false,
-          enableClickSelection: true,
-        },
-      }),
-      HorizontalRule,
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-      TaskList,
-      TaskItem.configure({ nested: true }),
-      Highlight.configure({ multicolor: true }),
-      Image,
-      Typography,
-      Superscript,
-      Subscript,
-      Selection,
-      ImageUploadNode.configure({
-        accept: "image/*",
-        maxSize: MAX_FILE_SIZE,
-        limit: 3,
-        upload: handleImageUpload,
-        onError: (error) => console.error("Upload failed:", error),
-      }),
-    ],
-  });
+  // const editor = useEditor({
+  //   immediatelyRender: false,
+  //   editorProps: {
+  //     attributes: {
+  //       autocomplete: "off",
+  //       autocorrect: "off",
+  //       autocapitalize: "off",
+  //       "aria-label": "Main content area, start typing to enter text.",
+  //       class: "simple-editor",
+  //     },
+  //   },
+  //   extensions: [
+  //     StarterKit.configure({
+  //       horizontalRule: false,
+  //       link: {
+  //         openOnClick: false,
+  //         enableClickSelection: true,
+  //       },
+  //     }),
+  //     HorizontalRule,
+  //     TextAlign.configure({ types: ["heading", "paragraph"] }),
+  //     TaskList,
+  //     TaskItem.configure({ nested: true }),
+  //     Highlight.configure({ multicolor: true }),
+  //     Image,
+  //     Typography,
+  //     Superscript,
+  //     Subscript,
+  //     Selection,
+  //     ImageUploadNode.configure({
+  //       accept: "image/*",
+  //       maxSize: MAX_FILE_SIZE,
+  //       limit: 3,
+  //       upload: handleImageUpload,
+  //       onError: (error) => console.error("Upload failed:", error),
+  //     }),
+  //   ],
+  // });
   const form = useForm<CreateItemProjectGroupSchema>({
     mode: "onChange",
     resolver: zodResolver(createItemProjectGroupSchema),
@@ -120,11 +107,12 @@ const CreateItemProject = ({
       startTime: "07:00",
       endTime: "07:00",
       priority: "LOW",
+      index: lengthItemProject,
       assignedUsers: [
         {
-          name: data?.user.name,
-          id: data?.user.id,
-          email: data?.user.email,
+          name: user.name,
+          id: user.id,
+          email: user.email,
         },
       ],
     },
@@ -140,10 +128,14 @@ const CreateItemProject = ({
       endTime: getValues("endTime"),
       priority: getValues("priority"),
       projectGroupId: getValues("projectGroupId"),
-      description: editor?.getHTML() as string,
+      description: "",
+      // description: editor?.getHTML() as string,
       assignedUsers: getValues("assignedUsers"),
+      index: lengthItemProject,
     });
   };
+
+  console.log(lengthItemProject);
 
   return (
     <Sheet>
@@ -159,38 +151,41 @@ const CreateItemProject = ({
         </Button>
       </SheetTrigger>
 
-      <SheetContent className=" flex flex-row  items-center min-w-11/12  h-11/12 translate-x-[-50%] translate-y-[-50%] left-1/2 top-1/2 rounded-xl px-4">
+      <SheetContent className=" flex flex-row  items-center min-w-fit   h-11/12 translate-x-[-50%] translate-y-[-50%] left-1/2 top-1/2 rounded-xl px-4">
         <Form {...form}>
-          <div className="flex flex-col w-full min-h-full relative">
-            <SheetTitle className=" z-50 px-3 py-5 mb-3">
-              <FormField
-                control={control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <input
-                        {...field}
-                        placeholder="Title Item"
-                        name="title"
-                        className=" placeholder-shown:text-3xl font-bold text-3xl focus:outline-none shadow-none"
-                      />
-                    </FormControl>
+          <div className="flex flex-col w-full min-h-full p-4">
+            <FormField
+              control={control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className=" flex flex-row items-center gap-2 min-w-[120px]">
+                    <Calendar strokeWidth={"3px"} size={17} />
+                    <h1 className=" text-sm">Start Date</h1>
+                  </FormLabel>
 
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </SheetTitle>
+                  <FormControl>
+                    <input
+                      {...field}
+                      placeholder="Title Item"
+                      name="title"
+                      className=" placeholder-shown:text-3xl font-bold text-3xl focus:outline-none shadow-none"
+                    />
+                  </FormControl>
 
-            <main className=" absolute left-0 mt-14 px-4 text-gray-500 ">
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <main className="  left-0 text-gray-500 ">
               <div className=" flex flex-col flex-wrap mt-3 justify-start items-start  w-11/12 gap-2">
                 <div className=" flex flex-col justify-start items-start  min-h-full">
                   <FormField
                     control={control}
                     name="startDate"
                     render={({ field }) => (
-                      <FormItem className=" w-full flex flex-row gap-3 justify-center items-center">
+                      <FormItem className=" w-full flex flex-col gap-3 justify-start items-start">
                         <FormLabel className=" flex flex-row items-center gap-2 min-w-[120px]">
                           <Calendar strokeWidth={"3px"} size={17} />
                           <h1 className=" text-sm">Start Date</h1>
@@ -259,6 +254,7 @@ const CreateItemProject = ({
                           <CircleDashed strokeWidth={"3px"} size={16} />
                           Priority
                         </FormLabel>
+
                         <FormControl className="  w-full">
                           <SelectPriority {...field} />
                         </FormControl>
@@ -270,7 +266,7 @@ const CreateItemProject = ({
                 </div>
               </div>
 
-              <SimpleEditor editor={editor} />
+              {/* <WYSIWYGTextEditor /> */}
             </main>
 
             <SheetFooter className=" flex flex-row justify-end">
@@ -285,7 +281,7 @@ const CreateItemProject = ({
           {/* mobile sidebar */}
         </Form>
 
-        <SheetSideBackground />
+        {/* <SheetSideBackground /> */}
       </SheetContent>
     </Sheet>
   );

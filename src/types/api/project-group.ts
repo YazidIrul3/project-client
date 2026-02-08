@@ -5,6 +5,7 @@ export type ProjectGroupEntity = Entity<{
   name: string;
   color: string;
   projectId: string;
+  index: number;
 }>;
 
 export type ProjectGroupBodyRequest = {

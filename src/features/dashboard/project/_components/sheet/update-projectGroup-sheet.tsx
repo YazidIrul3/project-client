@@ -31,13 +31,11 @@ import {
 } from "@/components/ui/card";
 import { ProjectGroupColors } from "@/helpers/color";
 import DeleteProjectGroupSheet from "./delete-projectGroup-sheet";
-import {
-  updateProjectGroupSchema,
-  UpdateProjectGroupSchema,
-  useUpdateProjectGroup,
-} from "@/features/api/projectGroup/update-project";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ProjectGroupEntity } from "@/types/api/project-group";
+import { useAuthenticated } from "@/hooks/use-authenticated";
+import { updateProjectGroupSchema, UpdateProjectGroupSchema, useUpdateProjectGroup } from "@/features/api/projectGroup/update-projectGroup";
 
 type UpdateProjectGroupSheetProps = {
   id: string;
@@ -53,11 +51,12 @@ const UpdateProjectGroupSheet = (props: UpdateProjectGroupSheetProps) => {
       name: props.data.name,
     },
   });
+  const { token } = useAuthenticated();
   const { control, getValues, setValue } = form;
-  const { data } = authClient.useSession();
+  // const { data } = authClient.useSession();
 
   const { mutate: updateProjectGroupMutation } = useUpdateProjectGroup({
-    token: data?.session.token as string,
+    token: token,
     id: props.id,
     mutationConfig: {
       onSuccess: () => {
@@ -65,11 +64,6 @@ const UpdateProjectGroupSheet = (props: UpdateProjectGroupSheetProps) => {
 
         window.location.reload();
       },
-      // onError: (error: any) => {
-      //   toast.error(
-      //     error?.response?.data?.message || "Failed to update Project Group"
-      //   );
-      // },
     },
   });
 

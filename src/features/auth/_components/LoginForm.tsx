@@ -11,17 +11,19 @@ import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-wor
 import { useLoading } from "@/hooks/use-loading";
 import { useCreateWorkspace } from "@/features/api/workspace/create-workspace";
 import { useAuthenticated } from "@/hooks/use-authenticated";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export const LoginForm = () => {
   const { onSubmit } = useLoginForm();
   const { data: data } = authClient.useSession();
   const { setCurrentWorkspace } = useCurrentWorkspace();
   const { setIsLoading } = useLoading();
+  const router = useRouter();
   const { mutate: createWorkspaceMutation, isPending: createWorkspaceLoading } =
     useCreateWorkspace({
       token: data?.session.token,
     });
-  const { onLogin, isAuthenticated } = useAuthenticated();
 
   const handleOnSubmit = () => {
     setIsLoading(true);
@@ -29,7 +31,23 @@ export const LoginForm = () => {
     onSubmit();
   };
 
-  console.log(isAuthenticated);
+  const getAccessTokenUser = async () => {
+    try {
+      const { data } = await authClient.getAccessToken({
+        providerId: "google",
+      });
+
+      if (data) {
+        router.replace("/account/profile");
+      }
+
+      console.log(data?.accessToken);
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    // getAccessTokenUser();
+  }, []);
 
   return (
     <div className=" flex flex-col gap-7 justify-center items-center w-full max-w-sm">

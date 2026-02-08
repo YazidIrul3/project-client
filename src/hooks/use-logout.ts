@@ -3,10 +3,13 @@ import { authClient } from "@/libs/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuthenticated } from "./use-authenticated";
+import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-workspace";
+import { set } from "zod";
 
 export const useLogout = () => {
   const router = useRouter();
   const { onLogout } = useAuthenticated();
+  const { setCurrentWorkspace } = useCurrentWorkspace();
 
   const onClick = async () => {
     try {
@@ -16,10 +19,12 @@ export const useLogout = () => {
             toast.success("Logout successful!");
 
             onLogout();
-            router.push("/login");
+            router.replace("/login");
+
+            window.location.reload();
           },
 
-          onError: (err) => {
+          onError: () => {
             toast.error("Logout Error!");
           },
         },

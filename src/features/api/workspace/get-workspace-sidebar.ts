@@ -16,7 +16,7 @@ export const getWorkspaceSidebar = async (props: GetWorkspaceSidebarProps) => {
       headers: {
         Authorization: `Bearer ${props.token}`,
       },
-    }
+    },
   );
 
   return response.data.data;
@@ -28,7 +28,7 @@ export const getWorkspaceSidebarQuery = (userId: string) => [
 ];
 
 export const getWorkspaceSidebarQueryOptions = (
-  props: GetWorkspaceSidebarProps
+  props: GetWorkspaceSidebarProps,
 ) => {
   return queryOptions({
     queryKey: getWorkspaceSidebarQuery(props.userId),

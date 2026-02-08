@@ -1,5 +1,4 @@
 import React from "react";
-import { useAppSidebarToogle } from "../../../hooks/use-sidebar";
 import { useSidebar } from "@/components/ui/sidebar";
 import {
   Tooltip,
@@ -14,15 +13,7 @@ const ItemSidebar = ({
   icon: React.ReactNode;
   name: string;
 }) => {
-  const {
-    state,
-    open,
-    setOpen,
-    openMobile,
-    setOpenMobile,
-    isMobile,
-    toggleSidebar,
-  } = useSidebar();
+  const { open } = useSidebar();
 
   return (
     <div className=" flex flex-row items-center gap-2">

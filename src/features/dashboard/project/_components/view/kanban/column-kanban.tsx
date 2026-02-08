@@ -7,9 +7,17 @@ import { useGetItemProjectGroupByProjectGroupId } from "@/features/api/itemProje
 import { authClient } from "@/libs/auth-client";
 import { ItemProjectGroupEntity } from "@/types/api/item-project-group";
 import ItemProject from "../../item-project";
-import { SortableContext, useSortable } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import { useAuthenticated } from "@/hooks/use-authenticated";
+import { toast } from "sonner";
+import { closestCorners, DndContext, DragEndEvent } from "@dnd-kit/core";
+import { useUpdateItemProjectGroupPosition } from "@/features/api/itemProject/update-itemProjectGroupPosition";
 
 type ColumnContainerKanban = {
   data: ProjectGroupEntity;
@@ -17,32 +25,70 @@ type ColumnContainerKanban = {
 
 const ColumnContainerKanban = (props: ColumnContainerKanban) => {
   const { data } = props;
-  const { data: user } = authClient.useSession();
+  const { user, token } = useAuthenticated();
   const { data: itemProjectGroups } = useGetItemProjectGroupByProjectGroupId({
-    token: user?.session.token as string,
-    projectGroupId: data?.id as string,
+    token: token,
+    projectGroupId: data?.id,
   });
-
   const taksIds = useMemo(
     () =>
       itemProjectGroups?.data?.map((item: ItemProjectGroupEntity) => item.id) ||
       [],
-    [itemProjectGroups]
+    [itemProjectGroups],
   );
 
-  const { setNodeRef, attributes, listeners, transform, transition } =
-    useSortable({
-      id: data?.id as string,
-      data: {
-        type: "Column",
-        data,
+  const {
+    setNodeRef,
+    attributes,
+    listeners,
+    transform,
+    transition,
+    isDragging,
+    isOver,
+  } = useSortable({
+    id: data?.id as string,
+    data: {
+      type: "Column",
+      data,
+    },
+  });
+  const { mutate: updateItemProjectGroupMutation } =
+    useUpdateItemProjectGroupPosition({
+      token: token,
+      projectGroupId: props.data.id,
+      mutationConfig: {
+        onSuccess: () => {
+          toast.success("Item Project Group updated successfully");
+        },
       },
     });
-
   const style = {
     transition,
     transform: CSS.Transform.toString(transform),
   };
+
+  const handleDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+
+    updateItemProjectGroupMutation({
+      body: {
+        activeId: active?.data?.current?.data?.id,
+        activeIndex: active?.data?.current?.data?.index,
+        overId: over?.data?.current?.data?.id,
+        overIndex: over?.data?.current?.data?.index,
+      },
+    });
+  };
+
+  if (isDragging) {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        className=" text-blue-900 min-h-[400px] border-dashed min-w-[300px] border border-slate-900 rounded-2xl"
+      ></div>
+    );
+  }
 
   return (
     <Card
@@ -73,19 +119,27 @@ const ColumnContainerKanban = (props: ColumnContainerKanban) => {
       </div>
 
       <CardContent className=" flex flex-col gap-3">
-        <SortableContext items={taksIds}>
-          {itemProjectGroups?.data?.map(
-            (item: ItemProjectGroupEntity, i: number) => {
-              return (
-                <ItemProject
-                  key={i}
-                  data={item}
-                  projectGroupId={props?.data?.id as string}
-                />
-              );
-            }
-          )}
-        </SortableContext>
+        <DndContext
+          onDragEnd={handleDragEnd}
+          collisionDetection={closestCorners}
+        >
+          <SortableContext
+            items={taksIds}
+            strategy={verticalListSortingStrategy}
+          >
+            {itemProjectGroups?.data?.map(
+              (item: ItemProjectGroupEntity, i: number) => {
+                return (
+                  <ItemProject
+                    key={i}
+                    data={item}
+                    projectGroupId={props?.data?.id as string}
+                  />
+                );
+              },
+            )}
+          </SortableContext>
+        </DndContext>
 
         <CreateItemProject
           borderColor={data?.color as string}

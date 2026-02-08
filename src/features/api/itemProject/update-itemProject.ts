@@ -1,8 +1,7 @@
 import { axiosInstance } from "@/libs/axios";
 import { MutationConfig } from "@/libs/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import z, { object, string } from "zod";
-import { User } from "better-auth";
+import z, { object } from "zod";
 import { getItemProjectGroupQuery } from "./create-itemProjectGroup";
 
 export const updateItemProjectGroupSchema = z.object({
@@ -20,7 +19,7 @@ export const updateItemProjectGroupSchema = z.object({
       name: z.string().min(1, "Name is required"),
       id: z.string().min(1, "ID is required"),
       email: z.string().email("Email is invalid"),
-    })
+    }),
   ),
 });
 
@@ -31,7 +30,7 @@ export type UpdateItemProjectGroupSchema = z.infer<
 export const updateItemProjectGroup = async (
   data: UpdateItemProjectGroupSchema,
   token: string,
-  id: string
+  id: string,
 ) => {
   const res = await axiosInstance.put(`/ItemprojectGroup/${id}`, data, {
     headers: {
@@ -49,7 +48,7 @@ type UseUpdateItemProjectGroupOptions = {
 };
 
 export const useUpdateItemProjectGroup = (
-  params: UseUpdateItemProjectGroupOptions
+  params: UseUpdateItemProjectGroupOptions,
 ) => {
   const queryClient = useQueryClient();
 
@@ -69,7 +68,7 @@ export const useUpdateItemProjectGroup = (
         data,
         Variables,
         onMutateResult,
-        context
+        context,
       );
     },
   });

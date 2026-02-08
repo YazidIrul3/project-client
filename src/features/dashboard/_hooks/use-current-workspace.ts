@@ -3,7 +3,9 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 type Props = {
   workspace: UseCurrentWorkspaceProps;
+  workspaceId: string;
   setCurrentWorkspace: (data: UseCurrentWorkspaceProps) => void;
+  setCurrentWorkspaceId: (id: string) => void;
 };
 
 type UseCurrentWorkspaceProps = {
@@ -18,12 +20,15 @@ export const useCurrentWorkspace = create<Props>()(
         name: "",
         userId: "",
       },
+      workspaceId: "",
       setCurrentWorkspace: (data: UseCurrentWorkspaceProps) =>
         set({ workspace: data }),
+      setCurrentWorkspaceId: (id: string) => set({ workspaceId: id }),
     }),
+
     {
       name: "auth-sesion",
       storage: createJSONStorage(() => localStorage),
-    }
-  )
+    },
+  ),
 );

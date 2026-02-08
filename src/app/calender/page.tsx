@@ -1,7 +1,7 @@
-import CalenderPage from "@/features/dashboard/callender/pages/CalenderPage";
+import CalendarPage from "@/features/dashboard/calendar/pages/CalendarPage";
 
 const Page = () => {
-  return <CalenderPage />;
+  return <CalendarPage />;
 };
 
 export default Page;

@@ -24,25 +24,27 @@ import {
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useAuthenticated } from "@/hooks/use-authenticated";
 
 const DeleteWorkspaceSheet = () => {
   const { workspace: currentWorkspace } = useCurrentWorkspace();
-  const { data: session } = authClient.useSession();
+  const { token, user } = useAuthenticated();
   const router = useRouter();
   const { data: workspace, isLoading: workspaceSidebarDataLoading } =
     useGetWorkspaceSidebar({
-      token: session?.session.token as string,
+      token: token,
       userId: currentWorkspace?.userId,
       workspaceName: currentWorkspace?.name,
     });
   const { setCurrentWorkspace } = useCurrentWorkspace();
   const { mutate: deleteWorkspaceMutation } = useDeleteWorkspace({
-    token: session?.session.token as string,
-    id: workspace?.id,
+    token: token,
+    id: workspace?.workspace?.id,
     mutationConfig: {
       onSuccess: () => {
         toast.success("Delete workspace success");
 
+        window.location.reload();
         router.replace("/account/profile");
       },
     },
@@ -52,18 +54,20 @@ const DeleteWorkspaceSheet = () => {
   const [inputValue, setInputValue] = useState<string>("");
 
   const handleOnDelete = () => {
-    if (session) {
+    if (token) {
       deleteWorkspaceMutation({
-        token: session?.session.token as string,
-        id: workspace?.id,
+        token: token,
+        id: workspace?.workspace?.id,
       });
 
       setCurrentWorkspace({
-        userId: session?.user?.id,
-        name: `${session?.user?.name}'s Space`,
+        userId: user.id,
+        name: `${user?.name}'s Space`,
       });
     }
   };
+
+  console.log(workspace?.workspace?.id);
 
   return (
     <Sheet>
@@ -71,7 +75,7 @@ const DeleteWorkspaceSheet = () => {
         asChild
         className=" min-w-fit justify-start flex font-normal text-sm px-2 py-2"
       >
-        {workspace?.workspaceType?.name == "personal" ? (
+        {workspace?.workspace?.workspaceType?.name == "personal" ? (
           <Button className=" bg-red-600 w-fit font-semibold" disabled>
             Delete
           </Button>
@@ -100,7 +104,7 @@ const DeleteWorkspaceSheet = () => {
                   <FormItem>
                     <FormLabel className=" mb-2 text-wrap flex flex-wrap">
                       Type
-                      <span className=" font-bold ">{`"${workspace?.name}"`}</span>
+                      <span className=" font-bold ">{`"${workspace?.workspace?.name}"`}</span>
                       to confirm
                     </FormLabel>
                     <FormControl>
@@ -117,7 +121,7 @@ const DeleteWorkspaceSheet = () => {
             </div>
 
             <SheetFooter className=" flex flex-row justify-end">
-              {workspace?.name != inputValue ? (
+              {workspace?.workspace?.name != inputValue ? (
                 <Button className=" bg-red-600 w-fit font-semibold" disabled>
                   Delete
                 </Button>
