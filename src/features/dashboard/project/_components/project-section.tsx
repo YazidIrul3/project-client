@@ -10,10 +10,11 @@ import { useEffect } from "react";
 import { useLoading } from "@/hooks/use-loading";
 
 type ProjectSectionHeaderProps = {
-  data?: ItemProjectGroupEntity;
+  data?: ProjectGroupEntity;
 };
 
 const ProjectSectionHeader = (props: ProjectSectionHeaderProps) => {
+  console.log(props.data);
   return (
     <div>
       <div>
@@ -21,7 +22,7 @@ const ProjectSectionHeader = (props: ProjectSectionHeaderProps) => {
           Project
         </h1>
         <h1 className=" uppercase font-bold text-slate-900 text-2xl">
-          {props.data?.title}
+          {props.data?.name}
         </h1>
       </div>
     </div>
@@ -50,7 +51,6 @@ const ProjectSectionMain = (props: ProjectSectionMainProps) => {
 };
 
 export const ProjectSection = (props: { projectId: string }) => {
-  const { data } = authClient.useSession();
   const { token } = useAuthenticated();
   const { setIsLoading } = useLoading();
 

@@ -15,22 +15,20 @@ interface AssignedUpdateUser {
 
 type SelectAssignedProps = {
   name: string;
-  assignedData: AssignedCreateUser[] | AssignedUpdateUser | any; // ✅ ARRAY
+  assignedData: AssignedCreateUser[] | AssignedUpdateUser | unknown; // ✅ ARRAY
   onChange?: (users: AssignedCreateUser[] | AssignedUpdateUser) => void;
   type?: string;
 };
 
 export const SelectAssigned = ({
-  name,
   assignedData,
-  onChange,
   type = "create",
 }: SelectAssignedProps) => {
   const [date, setDate] = useState<Date>();
   const [searchInputValue, setSearchInputValue] = useState<string>("");
 
   const assignedUsers = assignedData?.filter((item: AssignedCreateUser) =>
-    item.name.includes(searchInputValue)
+    item.name.includes(searchInputValue),
   );
 
   return (

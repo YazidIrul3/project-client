@@ -40,6 +40,7 @@ import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-wor
 import SheetSideBackground from "@/features/dashboard/_components/sheets/sheet-side-background";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSheet } from "@/hooks/use-sheet";
+import { useAuthenticated } from "@/hooks/use-authenticated";
 
 const CreateProjectSheet = () => {
   const { open } = useSidebar();
@@ -51,16 +52,16 @@ const CreateProjectSheet = () => {
       template: "default",
     },
   });
+  const { token } = useAuthenticated();
   const { control, getValues } = form;
   const { workspace: currentWorkspace } = useCurrentWorkspace();
-  const { data } = authClient.useSession();
   const { data: workspace } = useGetWorkspaceSidebar({
-    token: data?.session.token as string,
+    token: token,
     userId: currentWorkspace.userId,
     workspaceName: currentWorkspace.name,
   });
   const { mutate: createProjectMutaion } = useCreateProject({
-    token: data?.session.token as string,
+    token: token,
     mutationConfig: {
       onSuccess: () => {
         window.location.reload();
@@ -73,7 +74,7 @@ const CreateProjectSheet = () => {
   const handleOnSubmit = () => {
     createProjectMutaion({
       name: getValues("name"),
-      workspaceId: workspace?.id,
+      workspaceId: workspace?.workspace?.id,
       template: getValues("template"),
     });
 
@@ -92,7 +93,7 @@ const CreateProjectSheet = () => {
         </Button>
       </SheetTrigger>
 
-      <SheetContent className=" flex flex-row justify-between  min-w-9/12 mx-auto h-fit translate-x-[-50%] translate-y-[-50%] left-1/2 top-1/2 rounded-xl ">
+      <SheetContent className=" flex flex-row justify-between  min-w-[400px] mx-auto h-fit translate-x-[-50%] translate-y-[-50%] left-1/2 top-1/2 rounded-xl ">
         <Form {...form}>
           <div className=" flex flex-col w-full ">
             <SheetHeader className=" mb-3">
@@ -167,7 +168,7 @@ const CreateProjectSheet = () => {
           </div>
         </Form>
 
-        <SheetSideBackground />
+        {/* <SheetSideBackground /> */}
       </SheetContent>
     </Sheet>
   );

@@ -39,7 +39,9 @@ export const useCreateChat = (props: UseCreateChat) => {
     },
 
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: getChatChannelQuery() });
+      queryClient.invalidateQueries({
+        //  queryKey: getChatChannelQuery()
+      });
 
       props.mutationConfig?.onSuccess?.(
         data,

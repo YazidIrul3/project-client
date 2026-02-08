@@ -15,7 +15,8 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
     const { data, isPending, isRefetching } = authClient.useSession();
     const isSessionLoading = isPending || isRefetching;
     const { onLogin, token, setToken } = useAuthenticated();
-    const { workspace, setCurrentWorkspace } = useCurrentWorkspace();
+    const { workspace: currentWorkspace, setCurrentWorkspace } =
+      useCurrentWorkspace();
     const router = useRouter();
     const { setIsLoading } = useLoading();
     const { isAuthenticated, user: userData } = useAuthenticated();
@@ -26,15 +27,60 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
           onMutate() {
             console.log("🔥 CREATE WORKSPACE MUTATE");
           },
+          onSuccess(data, variables, onMutateResult, context) {
+            console.log(data);
+            console.log(variables);
+            console.log(onMutateResult);
+            console.log(context);
+          },
         },
       });
 
     // 🔒 KUNCI: pastikan effect hanya jalan sekali
     const hasInitialized = useRef(false);
 
+    const getAccessToken = async () => {
+      try {
+        setIsLoading(true);
+        const { data: accessTokenData } = await authClient.getAccessToken({
+          providerId: "google",
+        });
+
+        if (
+          accessTokenData?.accessToken !== token ||
+          token == "" ||
+          token == undefined
+        )
+          setToken(accessTokenData?.accessToken as string);
+
+        if (!accessTokenData?.accessToken) {
+          router.replace("/login");
+        }
+
+        if (data?.session.token) {
+          if (
+            currentWorkspace.name == "" ||
+            !currentWorkspace.name ||
+            currentWorkspace.name == undefined ||
+            currentWorkspace.userId != data?.session.userId
+          )
+            setCurrentWorkspace({
+              name: `${data.user.name}'s Space`,
+              userId: data.user.id,
+            });
+        }
+
+        setIsLoading(false);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     useEffect(() => {
       if ((isCreatingWorkspace && isAuthenticated == undefined) || !userData)
         return setIsLoading(true);
+
+      getAccessToken();
 
       if (hasInitialized.current) return;
 
@@ -44,27 +90,29 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
       // ❌ tidak login
       if (!data?.session?.token) {
         hasInitialized.current = true;
-        router.replace(redirectUrl);
+
         return;
       }
 
+      const workspaceName = `${data.user.name}'s Space`;
+
       // ✅ workspace sudah ada
       if (
-        workspace?.name == undefined ||
-        workspace?.name === "" ||
-        workspace?.name === null
+        currentWorkspace?.name == undefined ||
+        currentWorkspace?.name == "" ||
+        currentWorkspace?.name == null
       ) {
+        setCurrentWorkspace({
+          name: workspaceName,
+          userId: data.user.id,
+        });
+
         hasInitialized.current = true;
 
         return;
       }
 
-      if (data.session.token != token) setToken(data.session.token);
-
-      const workspaceName = `${data.user.name}'s Space`;
-
       onLogin(
-        data?.session.token as string,
         {
           id: data?.user.id as string,
           email: data?.user.email as string,
@@ -73,21 +121,16 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
         data?.session.expiresAt as Date,
       );
 
-      if (data) {
-        createWorkspace({
-          avatar: "tes",
-          name: workspaceName,
-          timezone: "tes",
-          userId: data.user.id,
-          workspaceTypeName: "personal",
-        });
-
-        // if (isAuthenticated) {
-        //   setCurrentWorkspace({
-        //     name: workspaceName,
-        //     userId: data.user.id,
-        //   });
-        // }
+      if (token && data) {
+        if (data.session.userId != currentWorkspace.userId) {
+          createWorkspace({
+            avatar: "tes",
+            name: workspaceName,
+            timezone: "tes",
+            userId: data.user.id,
+            workspaceTypeName: "personal",
+          });
+        }
 
         setIsLoading(false);
 
@@ -95,16 +138,7 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
       }
 
       setIsLoading(false);
-    }, [
-      isSessionLoading,
-      data?.session?.token,
-      workspace?.name,
-      isAuthenticated,
-    ]);
-
-    // if (isSessionLoading || isCreatingWorkspace) {
-    //   return <Spinner />;
-    // }
+    }, [isSessionLoading, currentWorkspace?.name, isAuthenticated, token]);
 
     return <OriginalComponent />;
   };

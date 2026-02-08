@@ -14,11 +14,7 @@ type UseAuthenticated = {
   setIsAuthenticated: (isAuthenticated: boolean) => void;
   token: string;
   expiresAt: Date;
-  onLogin: (
-    token: string,
-    user: UseAuthenticated["user"],
-    expiresAt: Date,
-  ) => void;
+  onLogin: (user: UseAuthenticated["user"], expiresAt: Date) => void;
   onLogout: () => void;
   setToken: (token: string) => void;
 };
@@ -32,12 +28,8 @@ export const useAuthenticated = create<UseAuthenticated>()(
       token: "",
       user: {} as UseAuthenticated["user"],
       expiresAt: new Date(),
-      onLogin: (
-        token: string,
-        user: UseAuthenticated["user"],
-        expiresAt: Date,
-      ) => {
-        set({ token, user, expiresAt });
+      onLogin: (user: UseAuthenticated["user"], expiresAt: Date) => {
+        set({ user, expiresAt });
       },
       onLogout: () => {
         set({

@@ -1,7 +1,7 @@
 import { useAuthenticated } from "@/hooks/use-authenticated";
 import { axiosInstance } from "@/libs/axios";
 import { QueryConfig } from "@/libs/react-query";
-import { queryOptions, useMutation, useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 
 export const getWorkspaces = async (token: string) => {
   const response = await axiosInstance.get("/workspace/", {

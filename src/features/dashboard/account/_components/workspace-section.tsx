@@ -21,10 +21,8 @@ import {
 import { useForm } from "react-hook-form";
 import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
 import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
-import { authClient } from "@/libs/auth-client";
 import { Input } from "@/components/ui/input";
-import React, { useEffect, useState } from "react";
-import { Spinner } from "@/components/ui/spinner";
+import React, { useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -37,7 +35,6 @@ import {
   WorkspaceMemberEntity,
   WorkspaceSidebarEntity,
   WorkspaceTypeEntity,
-  WorkspaceupdateEntity,
 } from "@/types/api/workspace";
 import {
   updatWorkspaceSchema,
@@ -49,7 +46,6 @@ import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLoading } from "@/hooks/use-loading";
 import { useAuthenticated } from "@/hooks/use-authenticated";
-import { set } from "zod";
 import {
   Table,
   TableBody,
@@ -58,31 +54,34 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus } from "lucide-react";
+import CreateWorkspaceMemberSheet from "./create-workspace-member-sheet";
+import DeleteWorkspaceMemberSheet from "./delete-workspace-member-sheet";
 
 export const WorkspaceForm = ({
   workspaceSidebarData,
 }: {
   workspaceSidebarData: WorkspaceSidebarEntity;
 }) => {
-  const { workspace: currentWorkspace } = useCurrentWorkspace();
-  const { data: session } = authClient.useSession();
+  const { workspace: currentWorkspace, setCurrentWorkspace } =
+    useCurrentWorkspace();
+  // const { data: session } = authClient.useSession();
   const { setIsLoading, isLoading } = useLoading();
   const form = useForm<UpdatWorkspaceSchema>({
     resolver: zodResolver(updatWorkspaceSchema),
     mode: "onChange",
     defaultValues: {
-      name: workspaceSidebarData?.name,
-      timezone:
-        workspaceSidebarData?.timezone != "tes"
-          ? workspaceSidebarData?.timezone
-          : "est",
+      name: "",
+      timezone: "",
     },
   });
-  const { control, getValues } = form;
-  const { mutate: updateWorkspaceMutation } = useUpdatWorkspace({
-    id: workspaceSidebarData?.id,
-    token: session?.session.token as string,
+  const { token, user } = useAuthenticated();
+  const { control, getValues, watch } = form;
+  const {
+    mutate: updateWorkspaceMutation,
+    isPending: updateWorkspaceMutationLoading,
+  } = useUpdatWorkspace({
+    id: workspaceSidebarData?.workspace?.id,
+    token: token,
     mutationConfig: {
       onSuccess: () => {
         toast.success("Update workspace success");
@@ -95,7 +94,21 @@ export const WorkspaceForm = ({
       name: getValues("name"),
       timezone: getValues("timezone"),
     });
+
+    setCurrentWorkspace({
+      name: getValues("name"),
+      userId: user.id,
+    });
   };
+
+  useEffect(() => {
+    if (updateWorkspaceMutationLoading) setIsLoading(true);
+
+    form.reset({
+      name: workspaceSidebarData?.workspace?.name,
+      timezone: workspaceSidebarData?.workspace?.timezone,
+    });
+  }, [workspaceSidebarData]);
 
   return (
     <Form {...form}>
@@ -107,7 +120,7 @@ export const WorkspaceForm = ({
         <CardContent className="flex flex-col gap-3">
           <h4 className=" font-semibold">Avatar</h4>
           <div className=" bg-red-600 uppercase text-slate-50 font-bold w-fit text-2xl px-5 py-3 flex justify-center items-center rounded-xl">
-            {workspaceSidebarData?.name[0]}
+            {workspaceSidebarData?.workspace?.name[0]}
           </div>
 
           <FormField
@@ -118,13 +131,18 @@ export const WorkspaceForm = ({
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl className=" lg:w-9/12 w-full">
-                  <Input {...field} placeholder="Type Workspace name" />
+                  <Input
+                    {...field}
+                    name="name"
+                    placeholder="Type Workspace name"
+                  />
                 </FormControl>
 
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
             control={control}
             defaultValue={getValues("timezone")}
@@ -133,7 +151,12 @@ export const WorkspaceForm = ({
               <FormItem>
                 <FormLabel className=" mb-2">Timezone</FormLabel>
                 <FormControl className=" lg:w-9/12 w-full">
-                  <Select {...field} name="timezone">
+                  <Select
+                    {...field}
+                    name="timezone"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
                     <SelectTrigger value={"tes"}>
                       <SelectValue placeholder="Select a timezone" />
                     </SelectTrigger>
@@ -150,15 +173,19 @@ export const WorkspaceForm = ({
             )}
           />
 
-          {getValues("name") == workspaceSidebarData?.name ? (
-            <Button className=" w-fit" type="button" disabled>
-              Save
-            </Button>
-          ) : (
-            <Button className=" w-fit" type="button" onClick={handleOnSubmit}>
-              Save
-            </Button>
-          )}
+          <Button
+            className=" w-fit"
+            type="button"
+            onClick={handleOnSubmit}
+            disabled={
+              workspaceSidebarData?.workspace?.name === watch("name") &&
+              workspaceSidebarData?.workspace?.timezone === watch("timezone")
+                ? true
+                : false
+            }
+          >
+            Save
+          </Button>
         </CardContent>
       </Card>
     </Form>
@@ -175,13 +202,15 @@ export const WorkspaceMembers = ({
   return (
     <Card>
       <CardHeader className=" flex flex-col gap-3 w-full">
-        <div className=" flex flex-row justify-between items-center w-full">
-          <CardTitle>Workspace Members</CardTitle>
+        <div className=" flex flex-row justify-between items-center min-w-full">
+          <CardTitle className=" w-full">Workspace Members</CardTitle>
 
-          <Button>
-            <Plus />
-            Add
-          </Button>
+          <div>
+            <CreateWorkspaceMemberSheet
+              workspaceType={workspaceType}
+              workspaceMembersData={workspaceMembers}
+            />
+          </div>
         </div>
 
         {workspaceType?.name.toLowerCase() == "personal" && (
@@ -199,7 +228,7 @@ export const WorkspaceMembers = ({
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Role</TableHead>
-              <TableHead>Joined</TableHead>
+              <TableHead>Joined / Status</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -209,7 +238,7 @@ export const WorkspaceMembers = ({
                 <TableRow key={i}>
                   <TableCell className="">
                     <div className=" flex flex-row gap-3 items-center">
-                      <div className=" bg-red-600 text-slate-50 font-bold text-xl px-6 py-4 uppercase flex justify-center items-center rounded-2xl">
+                      <div className=" bg-red-600 text-slate-50 font-bold text-xl px-5 py-3 uppercase flex justify-center items-center rounded-2xl">
                         {item.member.name[0]}
                       </div>
 
@@ -228,14 +257,26 @@ export const WorkspaceMembers = ({
                     </div>
                   </TableCell>
 
-                  <TableCell className="">
-                    <h3 className=" font-semibold text-sm">
-                      {new Date(item.createdAt).toLocaleDateString("en-US", {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </h3>
+                  <TableCell className=" flex flex-row items-center justify-center min-w-full">
+                    {item.status.toLocaleLowerCase() == "pending" ? (
+                      <div className=" flex justify-center items-center bg-yellow-200 border border-yellow-600 text-slate-50 w-fit px-6 py-1 text-sm font-bold rounded-full">
+                        <h1 className=" capitalize text-slate-900">
+                          {item.status}
+                        </h1>
+                      </div>
+                    ) : (
+                      <h3 className=" font-semibold text-sm">
+                        {new Date(item.createdAt).toLocaleDateString("en-US", {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </h3>
+                    )}
+
+                    {item.role.toLocaleLowerCase() != "owner" && (
+                      <DeleteWorkspaceMemberSheet id={item.id} />
+                    )}
                   </TableCell>
                 </TableRow>
               );
@@ -264,7 +305,7 @@ export const WorkspaceDeleteView = ({
         </CardDescription>
       </CardHeader>
 
-      {workspaceSidebarData?.workspaceType?.name == "personal" && (
+      {workspaceSidebarData?.workspace?.workspaceType?.name == "personal" && (
         <CardContent>
           <h1 className=" bg-red-100 rounded-lg w-full container mx-auto p-3 text-sm text-red-600">
             Personal is Workspace is not available to delete
@@ -299,8 +340,6 @@ export const WorkspaceSection = () => {
     setIsLoading(false);
   }, [workspaceSidebarDataLoading]);
 
-  console.log(workspaceSidebarData);
-
   return (
     <section>
       <AccountLayout>
@@ -309,8 +348,8 @@ export const WorkspaceSection = () => {
           <WorkspaceForm workspaceSidebarData={workspaceSidebarData} />
 
           <WorkspaceMembers
-            workspaceMembers={workspaceSidebarData?.workspaceMembers}
-            workspaceType={workspaceSidebarData?.workspaceType}
+            workspaceMembers={workspaceSidebarData?.workspace?.workspaceMembers}
+            workspaceType={workspaceSidebarData?.workspace?.workspaceType}
           />
 
           {/* delete card*/}

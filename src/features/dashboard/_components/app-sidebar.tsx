@@ -6,6 +6,7 @@ import {
   CheckCircle,
   ChevronRight,
   ChevronUp,
+  Hash,
   Plus,
   SettingsIcon,
 } from "lucide-react";
@@ -62,6 +63,7 @@ export const AppSidebarHeader = ({
   const { setIsLoading } = useLoading();
   const { open } = useSidebar();
   const { token, user } = useAuthenticated();
+
   // const { data: session } = authClient.useSession();
   const { data: workspaceByUser, isLoading: workspaceByUserLoading } =
     useGetWorkspacesByUser({
@@ -75,8 +77,6 @@ export const AppSidebarHeader = ({
     setIsLoading(false);
   }, [workspaceByUserLoading]);
 
-  console.log(workspaceSidebarData);
-
   return (
     <SidebarHeader className="py-3 flex flex-col gap-4  ">
       <SidebarMenu>
@@ -86,28 +86,28 @@ export const AppSidebarHeader = ({
               {open ? (
                 <div className=" flex flex-row items-center gap-3 justify-center py-2">
                   <div className=" bg-red-600 text-slate-50 font-bold text-lg p-3 uppercase flex justify-center items-center rounded-full">
-                    {currentWorkspace?.name[0]}
+                    {workspaceSidebarData?.workspace?.name[0]}
                   </div>
 
                   <div className=" flex flex-col">
                     <div className=" flex flex-row items-center gap-2 min-w-0">
                       <h1 className=" text-slate-900 text-sm truncate w-[140px] max-w-[140px]">
-                        {workspaceSidebarData?.name}
+                        {workspaceSidebarData?.workspace?.name}
                       </h1>
 
                       <h1 className=" bg-slate-800 text-slate-50 text-xs font-semibold rounded-full px-2 py-0.5 capitalize">
-                        {/* {userData[0]?.member?.subscription.name} */}
+                        {workspaceSidebarData?.member?.subscription?.name}
                       </h1>
                     </div>
                     <p className=" text-xs">
-                      {workspaceSidebarData?.workspaceType?.name}
+                      {workspaceSidebarData?.workspace?.workspaceType?.name}
                     </p>
                   </div>
                   <ChevronUp className="ml-auto" />
                 </div>
               ) : (
                 <div className="  bg-red-600 text-slate-50 font-bold text-lg p-3 flex justify-center items-center rounded-full">
-                  {workspaceSidebarData?.user?.name[0]}
+                  {workspaceSidebarData?.workspace?.name[0]}
                 </div>
               )}
             </SidebarMenuButton>
@@ -258,9 +258,23 @@ export const AppSidebarContent = ({
         </div>
 
         <div className="">
-          {chatChannel?.map((item: ChatChannelEntity) => {
-            return <ChatChannelLink key={item.id} data={item} />;
-          })}
+          {!open
+            ? chatChannel?.map((item: ChatChannelEntity) => (
+                <Link
+                  href={`/channel/${item.id}`}
+                  key={item.id}
+                  className=" mx-auto flex justify-center items-center"
+                >
+                  <ItemSidebar
+                    icon={<Hash size={19} strokeWidth={"2px"} />}
+                    name={item.name}
+                    key={item.id}
+                  />
+                </Link>
+              ))
+            : chatChannel?.map((item: ChatChannelEntity) => (
+                <ChatChannelLink key={item.id} data={item} />
+              ))}
         </div>
       </SidebarGroup>
 
@@ -291,10 +305,14 @@ export const AppSidebarContent = ({
   );
 };
 
-export const AppSidebarFooter = () => {
+export const AppSidebarFooter = ({
+  workspaceSidebarData,
+}: {
+  workspaceSidebarData: WorkspaceSidebarEntity;
+}) => {
   const { onClick } = useLogout();
   const { open } = useSidebar();
-  const { data } = authClient.useSession();
+  const { user } = useAuthenticated();
 
   return (
     <SidebarFooter>
@@ -306,15 +324,15 @@ export const AppSidebarFooter = () => {
                 {open ? (
                   <div className=" flex flex-row items-center h-fit w-full gap-3 justify-between py-2">
                     <div className=" bg-red-600 text-slate-50 font-bold text-lg p-3 flex justify-center items-center rounded-full">
-                      {data?.user.name[0]}
+                      {user.name[0]}
                     </div>
 
                     <div className=" flex flex-col">
                       <div className=" flex flex-col justify-between w-full  ">
                         <h1 className=" text-slate-900 text-sm font-bold">
-                          {data?.user.name}
+                          {user.name}
                         </h1>
-                        <p className=" text-xs">{data?.user.email}</p>
+                        <p className=" text-xs">{user.email}</p>
                       </div>
                     </div>
                     <ChevronUp className="ml-auto" />
@@ -323,7 +341,7 @@ export const AppSidebarFooter = () => {
                   // <div className=" bg-red-600  text-slate-50 font-bold text-lg w-[100px] h-[100px] flex justify-center items-center rounded-full">
                   // </div>
                   <div className="  bg-red-600 text-slate-50 font-bold text-lg p-3 flex justify-center items-center rounded-full">
-                    {/* {workspaceSidebarData?.user?.name[0]} */}
+                    {workspaceSidebarData?.workspace?.name[0]}
                   </div>
                 )}
               </SidebarMenuButton>
@@ -350,24 +368,21 @@ export const AppSidebarFooter = () => {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { workspace } = useCurrentWorkspace();
+  const { workspace: currentWorkspace, setCurrentWorkspaceId } =
+    useCurrentWorkspace();
   const { isLoading, setIsLoading } = useLoading();
-  const { token } = useAuthenticated();
-  // const { open } = useSidebar();
-  // const { data: session } = authClient.useSession();
+  const { token, user } = useAuthenticated();
   const { data: workspaceSidebarData, isLoading: workspaceSidebarDataLoading } =
     useGetWorkspaceSidebar({
       token: token,
-      userId: workspace.userId,
-      workspaceName: workspace.name,
-      // queryConfig: {
-      //   enabled: !!token && !!workspace.userId && !!workspace.name,
-      // },
+      userId: user.id,
+      workspaceName: currentWorkspace.name,
     });
 
   React.useEffect(() => {
     if (workspaceSidebarDataLoading) setIsLoading(true);
 
+    setCurrentWorkspaceId(workspaceSidebarData?.workspace?.id);
     setIsLoading(false);
   }, [workspaceSidebarDataLoading]);
 
@@ -383,11 +398,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
           {/* sidebar content */}
           <AppSidebarContent
-            projects={workspaceSidebarData?.projects}
-            chatChannel={workspaceSidebarData?.chatChannel}
+            projects={workspaceSidebarData?.workspace?.projects}
+            chatChannel={workspaceSidebarData?.workspace?.chatChannel}
           />
 
-          <AppSidebarFooter />
+          <AppSidebarFooter workspaceSidebarData={workspaceSidebarData} />
 
           <SidebarRail />
         </Sidebar>

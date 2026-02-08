@@ -1,3 +1,4 @@
+import { SelectInputData } from "@/helpers/select-input-data";
 import {
   Select,
   SelectContent,
@@ -8,33 +9,30 @@ import {
 } from "../ui/select";
 
 type SelectPriorityProps = {
-  onChange: (value: any) => void;
+  onChange: (value: unknown) => void;
 };
 
 export const SelectPriority = (props: SelectPriorityProps) => {
   return (
-    <Select defaultValue="LOW" onValueChange={props.onChange}>
-      <SelectTrigger>
+    <Select
+      defaultValue={SelectInputData.priority[0].toLowerCase()}
+      onValueChange={props.onChange}
+    >
+      <SelectTrigger className=" min-w-full">
         <SelectValue placeholder="Select a priority" />
       </SelectTrigger>
 
-      <SelectContent>
+      <SelectContent className=" min-w-full w-full">
         <SelectGroup className=" text-slate-900 text-xs">
-          <SelectItem value="LOW">
-            <h1 className=" bg-green-600 text-slate-50 font-bold px-4 py-1 rounded-sm text-xs">
-              Low
-            </h1>
-          </SelectItem>
-          <SelectItem value="MEDIUM">
-            <h1 className=" bg-yellow-600 text-slate-50 font-bold px-4 py-1 rounded-sm text-xs">
-              Medium
-            </h1>
-          </SelectItem>
-          <SelectItem value="HIGH">
-            <h1 className=" bg-red-600 text-slate-50 font-bold px-4 py-1 rounded-sm text-xs">
-              High
-            </h1>
-          </SelectItem>
+          {SelectInputData.priority.map((item, i: number) => (
+            <SelectItem key={i} value={item.toLowerCase()}>
+              <h1
+                className={`min-w-full capitalize w-full  text-slate-50 font-bold px-4 py-1 rounded-sm text-xs ${item.toLocaleLowerCase() == "low" ? "bg-yellow-600" : item.toLocaleLowerCase() == "medium" ? "bg-green-600" : "bg-red-600"}`}
+              >
+                {item}
+              </h1>
+            </SelectItem>
+          ))}
         </SelectGroup>
       </SelectContent>
     </Select>

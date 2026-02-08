@@ -86,7 +86,7 @@ const CreateChatChanneleSheet = () => {
       name: getValues("name"),
       description: getValues("description"),
       type: checked ? "private" : "general",
-      workspaceId: workspaceByNameAndUserId?.id,
+      workspaceId: workspaceByNameAndUserId?.workspace?.id,
       chatChannelMembers: getValues("chatChannelMembers"),
     });
   };

@@ -36,7 +36,7 @@ export type UpdateItemProjectGroupResponse = {
       id: string;
       email: string;
       name: string;
-    }
+    },
   ];
 };
 
@@ -54,6 +54,6 @@ export type ItemProjectGroupBodyRequest = {
       id: string;
       email: string;
       name: string;
-    }
+    },
   ];
 };

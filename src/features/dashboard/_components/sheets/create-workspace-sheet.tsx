@@ -43,10 +43,9 @@ import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
 import { useAuthenticated } from "@/hooks/use-authenticated";
 
 const CreateWorkspaceSheet = () => {
-  const { data } = authClient.useSession();
-  // const token = data?.session.token;
   const { token, user: userData } = useAuthenticated();
-  const { workspace: currentWorkspace } = useCurrentWorkspace();
+  const { workspace: currentWorkspace, setCurrentWorkspace } =
+    useCurrentWorkspace();
   const form = useForm<CreateWorkspaceInputSchema>({
     resolver: zodResolver(createWorkspaceInputSchema),
     mode: "onChange",
@@ -61,7 +60,12 @@ const CreateWorkspaceSheet = () => {
   const { mutate: createWorkspaceMutation } = useCreateWorkspace({
     token,
     mutationConfig: {
-      onSuccess: () => {
+      onSuccess(data, variables) {
+        setCurrentWorkspace({
+          name: variables.name,
+          userId: variables.userId,
+        });
+
         toast.success("Created Workspace successfully");
 
         window.location.reload();
@@ -73,7 +77,7 @@ const CreateWorkspaceSheet = () => {
     },
   });
   const { control, getValues } = form;
-  const { open, openSheet, setOpen, closeSheet } = useSheet();
+  const { open, openSheet, setOpen } = useSheet();
 
   const handleOnSubmit = () => {
     createWorkspaceMutation({

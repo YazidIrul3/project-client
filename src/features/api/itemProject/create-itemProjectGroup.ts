@@ -12,13 +12,13 @@ export const createItemProjectGroupSchema = z.object({
   startTime: z.string(),
   endTime: z.string(),
   priority: z.string().min(1, "Priority is required"),
-  index: z.int().optional(),
+  index: z.int(),
   assignedUsers: z.array(
     object({
       name: z.string().min(1, "Name is required"),
       id: z.string().min(1, "ID is required"),
       email: z.string().email("Email is invalid"),
-    })
+    }),
   ),
 });
 
@@ -28,7 +28,7 @@ export type CreateItemProjectGroupSchema = z.infer<
 
 export const createItemProjectGroup = async (
   body: CreateItemProjectGroupSchema,
-  token: string
+  token: string,
 ) => {
   const response = await axiosInstance.post("/itemProjectGroup/", body, {
     headers: {
@@ -47,7 +47,7 @@ type UseCreateItemProjectGroup = {
 };
 
 export const useCreateItemProjectGroup = (
-  params: UseCreateItemProjectGroup
+  params: UseCreateItemProjectGroup,
 ) => {
   return useMutation({
     ...params.mutationConfig,
@@ -63,7 +63,7 @@ export const useCreateItemProjectGroup = (
         data,
         variables,
         onMutateResult,
-        context
+        context,
       );
     },
   });

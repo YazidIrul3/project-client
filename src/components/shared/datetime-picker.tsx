@@ -8,7 +8,7 @@ import { Input } from "../ui/input";
 
 type DateTimePickerProps = {
   name: string;
-  onChange?: (date: any) => void;
+  onChange?: (date: unknown) => void;
 };
 
 export const DateTimePicker = (props: DateTimePickerProps) => {
