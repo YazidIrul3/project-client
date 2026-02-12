@@ -15,7 +15,7 @@ interface AssignedUpdateUser {
 
 type SelectAssignedProps = {
   name: string;
-  assignedData: AssignedCreateUser[]; // ✅ ARRAY
+  assignedData: AssignedCreateUser[] | AssignedUpdateUser | unknown; // ✅ ARRAY
   onChange?: (users: AssignedCreateUser[] | AssignedUpdateUser) => void;
   type?: string;
   workspaceMembersData?: WorkspaceMemberEntity[];
