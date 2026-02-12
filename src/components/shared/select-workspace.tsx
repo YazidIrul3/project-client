@@ -20,7 +20,7 @@ export const SelectWorkspace = (props: SelectWorkspaceProps) => {
   return (
     <Select defaultValue={workspaceId} onValueChange={props.onChange}>
       <SelectTrigger className=" min-w-full">
-        <SelectValue placeholder="Select a priority" />
+        <SelectValue placeholder="Select a workspace" />
       </SelectTrigger>
 
       <SelectContent className=" min-w-full w-full">

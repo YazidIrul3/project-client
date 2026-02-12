@@ -18,8 +18,6 @@ import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -35,16 +33,18 @@ import { useSheet } from "@/hooks/use-sheet";
 import { ProjectEntity } from "@/types/api/project";
 import { WorkspaceEntity } from "@/types/api/workspace";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  ArrowRightCircle,
-  Calendar,
-  Clock,
-  Plus,
-  UsersRound,
-} from "lucide-react";
+import { ArrowRightCircle, Calendar, Clock, Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
+import { useGetWorkspaceMembersByWorkspaceId } from "@/features/api/workspaceMember/get-workspaceMembersByWorkspaceId";
+
+interface AssignedCreateUser {
+  id: string;
+  email: string;
+  name: string;
+}
 
 const CreateTaskSheet = ({
   projectsData,
@@ -54,35 +54,46 @@ const CreateTaskSheet = ({
   workspacesData: WorkspaceEntity[];
 }) => {
   const { user, token } = useAuthenticated();
-  const [taskOwners, setTaskOwners] = useState([
-    {
-      name: user.name,
-      email: user.email,
-      id: user.id,
-    },
-  ]);
-
+  const { workspaceId } = useCurrentWorkspace();
   const form = useForm<CreateTaskSchema>({
     resolver: zodResolver(createTaskSchema),
     mode: "onChange",
     defaultValues: {
       description: "",
-      title: "",
+      name: "",
       startDate: new Date(),
       endDate: new Date(),
       startTime: "07:00",
       endTime: "07:00",
       status: "todo",
       priority: "LOW",
+      workspaceId,
     },
   });
   const { open, setOpen } = useSheet();
-  const { control, watch, getValues } = form;
+  const { control, getValues, watch } = form;
+  const { data: workspaceMembersByWorkspaceIdData } =
+    useGetWorkspaceMembersByWorkspaceId({
+      token,
+      workspaceId: watch("workspaceId"),
+    });
+
+  const [taskPIC, setTaskPIC] = useState([
+    {
+      name: user.name,
+      email: user.email,
+      id: user.id,
+    },
+  ]);
+  const [taskCC, setTaskCC] = useState<AssignedCreateUser[]>([]);
+
   const { mutate: createTaskMutation } = useCreateTask({
     token: token,
     mutationConfig: {
       onSuccess: () => {
         toast.success("Created task succesfully");
+
+        window.location.reload();
       },
 
       onError: () => {
@@ -94,7 +105,7 @@ const CreateTaskSheet = ({
   const handleOnSubmit = () => {
     createTaskMutation({
       description: getValues("description"),
-      title: getValues("title"),
+      name: getValues("name"),
       status: getValues("status"),
       priority: getValues("priority"),
       projectId: getValues("projectId"),
@@ -103,7 +114,28 @@ const CreateTaskSheet = ({
       startTime: getValues("startTime"),
       endTime: getValues("endTime"),
       workspaceId: getValues("workspaceId"),
-      taskOwners: taskOwners,
+      taskPIC: taskPIC,
+      taskCC: taskCC,
+    });
+  };
+
+  const handleAddTaskPIC = (members: {
+    id: string;
+    email: string;
+    name: string;
+  }) => {
+    setTaskPIC((prev) => {
+      return [...prev, members];
+    });
+  };
+
+  const handleAddTaskCC = (members: {
+    id: string;
+    email: string;
+    name: string;
+  }) => {
+    setTaskCC((prev: AssignedCreateUser[]) => {
+      return [...prev, members];
     });
   };
 
@@ -115,6 +147,7 @@ const CreateTaskSheet = ({
           Add Task
         </Button>
       </SheetTrigger>
+
       <div className="min-w-full mx-auto h-full">
         <SheetContent className=" flex flex-row justify-between w-6/12 min-w-[400px] max-w-[1600px] max-h-11/12 overflow-y-scroll scrollbar-hide py-2 px-2   rounded-xl translate-x-[-50%] translate-y-[-50%] left-1/2 top-1/2">
           <Form {...form}>
@@ -128,7 +161,7 @@ const CreateTaskSheet = ({
               <div className=" px-4 flex flex-col gap-3.5  overflow-y-scroll scrollbar-hide">
                 <FormField
                   control={control}
-                  name="title"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className=" text-xs">Name</FormLabel>
@@ -185,6 +218,7 @@ const CreateTaskSheet = ({
                             <SelectWorkspace
                               {...field}
                               workspacesData={workspacesData}
+                              onChange={field.onChange}
                             />
                           </div>
                         </FormControl>
@@ -221,7 +255,7 @@ const CreateTaskSheet = ({
                 <div className=" grid md:grid-cols-2 grid-cols-1 gap-3">
                   <FormField
                     control={control}
-                    name="taskOwners"
+                    name="taskPIC"
                     render={({ field }) => (
                       <FormItem className=" w-full flex flex-col gap-2">
                         <FormLabel className=" flex flex-row items-center gap-2 text-xs ">
@@ -231,8 +265,12 @@ const CreateTaskSheet = ({
                         <FormControl className="  w-full">
                           <SelectAssigned
                             {...field}
-                            assignedData={taskOwners}
-                            name="taskOwners"
+                            assignedData={taskPIC}
+                            workspaceMembersData={
+                              workspaceMembersByWorkspaceIdData?.data
+                            }
+                            handleOnClick={handleAddTaskPIC}
+                            name="taskPIC"
                           />
                         </FormControl>
 
@@ -243,7 +281,7 @@ const CreateTaskSheet = ({
 
                   <FormField
                     control={control}
-                    name="taskOwners"
+                    name="taskCC"
                     render={({ field }) => (
                       <FormItem className=" w-full flex flex-col gap-2">
                         <FormLabel className=" flex flex-row items-center gap-2 text-xs ">
@@ -253,8 +291,12 @@ const CreateTaskSheet = ({
                         <FormControl className="  w-full">
                           <SelectAssigned
                             {...field}
-                            assignedData={taskOwners}
-                            name="taskOwners"
+                            assignedData={taskCC}
+                            workspaceMembersData={
+                              workspaceMembersByWorkspaceIdData?.data
+                            }
+                            handleOnClick={handleAddTaskCC}
+                            name="taskCC"
                           />
                         </FormControl>
 

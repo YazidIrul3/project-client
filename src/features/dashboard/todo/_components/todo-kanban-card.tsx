@@ -1,66 +1,33 @@
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { useGetTasksByUserIdAndTaskName } from "@/features/api/task/get-tasksByUserIdAndTaskName";
+import { useAuthenticated } from "@/hooks/use-authenticated";
+import { useLoading } from "@/hooks/use-loading";
+import { TaskEntity } from "@/types/api/task";
+import { useEffect } from "react";
+import { TaskCard } from "./task-card";
 
 type TodoKanbanCard = {
-  data: [];
+  name: string;
 };
 
-const TodoKanbanCard = (props: TodoKanbanCard) => {
-  //   const { data } = props;
-  //   const { user, token } = useAuthenticated();
-  //   const { data: itemProjectGroups } = useGetItemProjectGroupByProjectGroupId({
-  //     token: token,
-  //     projectGroupId: props.data,
-  //   });
-  //   const taksIds = useMemo(
-  //     () =>
-  //       itemProjectGroups?.data?.map((item: ItemProjectGroupEntity) => item.id) ||
-  //       [],
-  //     [itemProjectGroups],
-  //   );
+const TodoKanbanCard = ({ name }: TodoKanbanCard) => {
+  const { token, user } = useAuthenticated();
+  const { setIsLoading } = useLoading();
+  const {
+    data: tasksByUserIdAndTaskNameData,
+    isLoading: tasksByUserIdAndTaskNameIsLoading,
+  } = useGetTasksByUserIdAndTaskName({
+    token,
+    userId: user.id,
+    taskName: name,
+  });
 
-  //   const {
-  //     setNodeRef,
-  //     attributes,
-  //     listeners,
-  //     transform,
-  //     transition,
-  //     isDragging,
-  //     isOver,
-  //   } = useSortable({
-  //     id: data?.id as string,
-  //     data: {
-  //       type: "Column",
-  //       data,
-  //     },
-  //   });
-  //   const { mutate: updateItemProjectGroupMutation } =
-  //     useUpdateItemProjectGroupPosition({
-  //       token: token,
-  //       projectGroupId: props.data.id,
-  //       mutationConfig: {
-  //         onSuccess: () => {
-  //           toast.success("Item Project Group updated successfully");
-  //         },
-  //       },
-  //     });
-  //   const style = {
-  //     transition,
-  //     transform: CSS.Transform.toString(transform),
-  //   };
+  useEffect(() => {
+    if (tasksByUserIdAndTaskNameIsLoading) setIsLoading(true);
+    setIsLoading(false);
+  }, [tasksByUserIdAndTaskNameIsLoading]);
 
-  //   const handleDragEnd = (e: DragEndEvent) => {
-  //     const { active, over } = e;
-
-  //     updateItemProjectGroupMutation({
-  //       body: {
-  //         activeId: active?.data?.current?.data?.id,
-  //         activeIndex: active?.data?.current?.data?.index,
-  //         overId: over?.data?.current?.data?.id,
-  //         overIndex: over?.data?.current?.data?.index,
-  //       },
-  //     });
-  //   };
-
+  console.log(tasksByUserIdAndTaskNameData?.data);
   return (
     <Card className=" min-w-[250px] min-h-[400px] p-3">
       <div className=" flex flex-row items-center justify-between px-2">
@@ -73,7 +40,7 @@ const TodoKanbanCard = (props: TodoKanbanCard) => {
             }}
             className={`h-[13px] w-[13px] rounded-full `}
           ></div>
-          <h1 className=" font-bold text-sm capitalize">{"testing"}</h1>
+          <h1 className=" font-bold text-sm capitalize">{name}</h1>
         </CardTitle>
 
         <div className=" flex flex-row items-center gap-2">
@@ -83,7 +50,23 @@ const TodoKanbanCard = (props: TodoKanbanCard) => {
         </div>
       </div>
 
-      <CardContent className=" flex flex-col gap-3">
+      <div className=" flex flex-col gap-3">
+        {tasksByUserIdAndTaskNameData?.data?.map(
+          (item: TaskEntity, i: number) => {
+            return (
+              <TaskCard key={i} taskData={item} />
+              // <div
+              //   key={i}
+              //   className=" text-slate-900 font-bold shadow-sm text-sm border  border-black rounded-lg p-3 min-w-full w-full min-h-[70px]"
+              // >
+              //   <h1 className="w-11/12 line-clamp-3">{item.name}</h1>
+
+              //   <div></div>
+              // </div>
+            );
+          },
+        )}
+
         {/* <DndContext
           onDragEnd={handleDragEnd}
           collisionDetection={closestCorners}
@@ -112,7 +95,7 @@ const TodoKanbanCard = (props: TodoKanbanCard) => {
           lengthItemProject={itemProjectGroups?.data.length}
         />
         */}
-      </CardContent>
+      </div>
     </Card>
   );
 };

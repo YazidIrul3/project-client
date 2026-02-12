@@ -10,11 +10,12 @@ import { useAuthenticated } from "@/hooks/use-authenticated";
 import { useEffect } from "react";
 import { useLoading } from "@/hooks/use-loading";
 import { useGetWorkspacesByUserId } from "@/features/api/workspace/get-workspacesByuserId";
+import { SelectInputData } from "../../../../helpers/select-input-data";
 
 export const TodoSection = () => {
   const { workspaceId } = useCurrentWorkspace();
   const { token, user } = useAuthenticated();
-  const { setIsLoading, isLoading } = useLoading();
+  const { setIsLoading } = useLoading();
   const {
     data: projectsByWorkspaceIdData,
     isLoading: projectsByWorkspaceIdIsLoading,
@@ -54,10 +55,9 @@ export const TodoSection = () => {
 
         <main className=" mt-3">
           <div className="flex flex-row gap-3 overflow-x-auto w-full scrollbar-hide  p-4">
-            <TodoKanbanCard data={[]} />
-            <TodoKanbanCard data={[]} />
-            <TodoKanbanCard data={[]} />
-            <TodoKanbanCard data={[]} />
+            {SelectInputData.status.map((status, i: number) => {
+              return <TodoKanbanCard key={i} name={status.toLowerCase()} />;
+            })}
           </div>
         </main>
       </section>

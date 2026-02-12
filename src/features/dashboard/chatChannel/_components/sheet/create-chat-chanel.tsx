@@ -21,7 +21,7 @@ import {
 import { authClient } from "@/libs/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LockKeyhole, Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useSheet } from "@/hooks/use-sheet";
@@ -34,18 +34,36 @@ import {
 } from "@/features/api/chatChannel/create-chatChannel";
 import { useCurrentWorkspace } from "@/features/dashboard/_hooks/use-current-workspace";
 import { useGetWorkspaceSidebar } from "@/features/api/workspace/get-workspace-sidebar";
+import { SelectAssigned } from "@/components/shared/select-assigned";
+import { useAuthenticated } from "@/hooks/use-authenticated";
+import { useGetWorkspaceMembersByWorkspaceId } from "@/features/api/workspaceMember/get-workspaceMembersByWorkspaceId";
+import { useLoading } from "@/hooks/use-loading";
 
 const CreateChatChanneleSheet = () => {
-  const { data } = authClient.useSession();
-  const { workspace: currentWorkspace } = useCurrentWorkspace();
+  const { workspace: currentWorkspace, workspaceId } = useCurrentWorkspace();
+  const { setIsLoading } = useLoading();
   const [checked, setChecked] = useState<boolean>(false);
-  const token = data?.session.token;
+  const { user, token } = useAuthenticated();
+  const [chatChannelMembers, setChatChannelMembers] = useState([
+    {
+      name: user.name,
+      email: user.email,
+      id: user.id,
+    },
+  ]);
+  const {
+    data: workspaceMembersByWorkspaceIdData,
+    isLoading: workspaceMembersByWorkspaceIdLoading,
+  } = useGetWorkspaceMembersByWorkspaceId({
+    token,
+    workspaceId,
+  });
 
   const {
     data: workspaceByNameAndUserId,
     isLoading: workspaceSidebarDataLoading,
   } = useGetWorkspaceSidebar({
-    token: token as string,
+    token: token,
     userId: currentWorkspace.userId,
     workspaceName: currentWorkspace.name,
     queryConfig: {
@@ -90,6 +108,23 @@ const CreateChatChanneleSheet = () => {
       chatChannelMembers: getValues("chatChannelMembers"),
     });
   };
+
+  const handleAddChatChannelMembers = (members: {
+    id: string;
+    email: string;
+    name: string;
+  }) => {
+    setChatChannelMembers((prev) => {
+      return [...prev, members];
+    });
+  };
+
+  useEffect(() => {
+    if (workspaceMembersByWorkspaceIdLoading || workspaceSidebarDataLoading)
+      setIsLoading(true);
+
+    setIsLoading(false);
+  }, [workspaceMembersByWorkspaceIdLoading, workspaceSidebarDataLoading]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -148,6 +183,26 @@ const CreateChatChanneleSheet = () => {
                   )}
                 />
 
+                {checked && (
+                  <div>
+                    <div className=" flex flex-col gap-3">
+                      <FormLabel>Chat channel Members</FormLabel>
+                      <div className=" min-w-full w-full">
+                        <SelectAssigned
+                          assignedData={chatChannelMembers}
+                          handleOnClick={(member) =>
+                            handleAddChatChannelMembers(member)
+                          }
+                          workspaceMembersData={
+                            workspaceMembersByWorkspaceIdData?.data
+                          }
+                          name=""
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className=" flex flex-row items-center gap-2">
                   <div className=" flex flex-col gap-1">
                     <div className=" flex flex-row items-center gap-2">
@@ -171,12 +226,6 @@ const CreateChatChanneleSheet = () => {
               </div>
 
               <SheetFooter className="flex justify-end flex-row">
-                {/* <Button
-              variant={"ghost"}
-              className=" justify-start flex font-normal text-sm px-4 w-fit"
-              >
-              Cancel
-              </Button> */}
                 <Button
                   onClick={handleOnSubmit}
                   className=" justify-start flex font-normal text-sm px-4 w-fit"

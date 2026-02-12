@@ -10,12 +10,17 @@ import {
 
 type SelectStatusProps = {
   onChange: (value: unknown) => void;
+  taskStatus?: string;
 };
 
 export const SelectStatus = (props: SelectStatusProps) => {
   return (
     <Select
-      defaultValue={SelectInputData.status[0].toLowerCase()}
+      defaultValue={
+        props.taskStatus
+          ? props.taskStatus
+          : SelectInputData.status[0].toLowerCase()
+      }
       onValueChange={props.onChange}
     >
       <SelectTrigger className=" min-w-full">
@@ -33,6 +38,16 @@ export const SelectStatus = (props: SelectStatusProps) => {
               </h1>
             </SelectItem>
           ))}
+
+          {props.taskStatus && (
+            <SelectItem value={props.taskStatus.toLowerCase()}>
+              <h1
+                className={`min-w-full capitalize w-full  text-slate-50 font-bold px-4 py-1 rounded-sm text-xs bg-pink-600`}
+              >
+                Other
+              </h1>
+            </SelectItem>
+          )}
         </SelectGroup>
       </SelectContent>
     </Select>
