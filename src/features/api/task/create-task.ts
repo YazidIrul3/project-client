@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import z, { object } from "zod";
 
 export const createTaskSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
   projectId: z.uuid().optional(),
   workspaceId: z.uuid(),
@@ -14,7 +14,14 @@ export const createTaskSchema = z.object({
   endTime: z.string(),
   status: z.string(),
   priority: z.string(),
-  taskOwners: z.array(
+  taskPIC: z.array(
+    object({
+      name: z.string().min(1, "Name is required"),
+      id: z.string().min(1, "ID is required"),
+      email: z.string().email("Email is invalid"),
+    }),
+  ),
+  taskCC: z.array(
     object({
       name: z.string().min(1, "Name is required"),
       id: z.string().min(1, "ID is required"),
