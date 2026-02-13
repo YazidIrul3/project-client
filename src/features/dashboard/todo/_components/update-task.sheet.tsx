@@ -33,12 +33,14 @@ import { useSheet } from "@/hooks/use-sheet";
 import { ProjectEntity } from "@/types/api/project";
 import { WorkspaceEntity } from "@/types/api/workspace";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRightCircle, Calendar, Clock, Plus } from "lucide-react";
+import { ArrowRightCircle, Calendar, Clock, PenIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
 import { useGetWorkspaceMembersByWorkspaceId } from "@/features/api/workspaceMember/get-workspaceMembersByWorkspaceId";
+import { TaskEntity } from "@/types/api/task";
+import { email } from "zod";
 
 interface AssignedCreateUser {
   id: string;
@@ -46,12 +48,14 @@ interface AssignedCreateUser {
   name: string;
 }
 
-const CreateTaskSheet = ({
+const UpdateTaskSheet = ({
   projectsData,
   workspacesData,
+  taskData,
 }: {
   projectsData: ProjectEntity[];
   workspacesData: WorkspaceEntity[];
+  taskData: TaskEntity;
 }) => {
   const { user, token } = useAuthenticated();
   const { workspaceId } = useCurrentWorkspace();
@@ -59,10 +63,10 @@ const CreateTaskSheet = ({
     resolver: zodResolver(createTaskSchema),
     mode: "onChange",
     defaultValues: {
-      description: "",
-      name: "",
-      startDate: new Date(),
-      endDate: new Date(),
+      description: taskData.description,
+      name: taskData.name,
+      startDate: new Date(taskData.startDate.toLocaleString().split("T")[0]),
+      endDate: new Date(taskData.endDate.toLocaleString().split("T")[0]),
       startTime: "07:00",
       endTime: "07:00",
       status: "backlog",
@@ -71,21 +75,31 @@ const CreateTaskSheet = ({
     },
   });
   const { open, setOpen } = useSheet();
-  const { control, getValues, watch } = form;
+  const { control, getValues } = form;
   const { data: workspaceMembersByWorkspaceIdData } =
     useGetWorkspaceMembersByWorkspaceId({
       token,
       workspaceId: getValues("workspaceId"),
     });
 
-  const [taskPIC, setTaskPIC] = useState([
-    {
-      name: user.name,
-      email: user.email,
-      id: user.id,
-    },
-  ]);
-  const [taskCC, setTaskCC] = useState<AssignedCreateUser[]>([]);
+  const [taskPIC, setTaskPIC] = useState(
+    taskData.taskPIC?.map((item) => {
+      return {
+        name: item.pic.name,
+        email: item.pic.email,
+        id: item.pic.id,
+      };
+    }),
+  );
+  const [taskCC, setTaskCC] = useState<AssignedCreateUser[]>(
+    taskData.taskCCs?.map((item) => {
+      return {
+        name: item.cc.name,
+        email: item.cc.email,
+        id: item.cc.id,
+      };
+    }),
+  );
 
   const { mutate: createTaskMutation } = useCreateTask({
     token: token,
@@ -139,13 +153,16 @@ const CreateTaskSheet = ({
     });
   };
 
+  console.log(taskData.startDate.toLocaleString().split("T"));
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild className=" w-fit font-normal text-sm px-2 py-2">
-        <Button className=" w-fit">
-          <Plus />
-          Add Task
-        </Button>
+      <SheetTrigger asChild className="  ">
+        <div className=" min-w-full flex flex-row items-center gap-2">
+          <PenIcon />
+
+          <h1 className=" text-sm">Edit data</h1>
+        </div>
       </SheetTrigger>
 
       <div className="min-w-full mx-auto h-full">
@@ -154,7 +171,7 @@ const CreateTaskSheet = ({
             <div className=" flex flex-col w-full ">
               <SheetHeader className="">
                 <SheetTitle className=" text-xl font-bold">
-                  Create New Task
+                  Update Task
                 </SheetTitle>
               </SheetHeader>
 
@@ -217,7 +234,9 @@ const CreateTaskSheet = ({
                           <div className=" min-w-full w-full">
                             <SelectWorkspace
                               {...field}
-                              workspacesData={workspacesData}
+                              workspacesData={
+                                workspacesData as WorkspaceEntity[]
+                              }
                               onChange={field.onChange}
                             />
                           </div>
@@ -335,7 +354,11 @@ const CreateTaskSheet = ({
                           <h1 className=" text-sm">Start Date</h1>
                         </FormLabel>
                         <FormControl className="">
-                          <DateTimePicker {...field} name="start" />
+                          <DateTimePicker
+                            {...field}
+                            name="start"
+                            date={getValues("startDate")}
+                          />
                         </FormControl>
 
                         <FormMessage />
@@ -351,7 +374,11 @@ const CreateTaskSheet = ({
                           <h1 className=" text-sm">End Date</h1>
                         </FormLabel>
                         <FormControl className="">
-                          <DateTimePicker {...field} name="end" />
+                          <DateTimePicker
+                            {...field}
+                            name="end"
+                            date={getValues("endDate")}
+                          />
                         </FormControl>
 
                         <FormMessage />
@@ -417,17 +444,11 @@ const CreateTaskSheet = ({
               </div>
 
               <div className="flex justify-end flex-row">
-                {/* <Button
-              variant={"ghost"}
-              className=" justify-start flex font-normal text-sm px-4 w-fit"
-              >
-              Cancel
-              </Button> */}
                 <Button
                   onClick={handleOnSubmit}
                   className=" justify-start flex font-normal z-50 text-sm px-4 w-fit"
                 >
-                  Create
+                  Save
                 </Button>
               </div>
             </div>
@@ -438,4 +459,4 @@ const CreateTaskSheet = ({
   );
 };
 
-export default CreateTaskSheet;
+export default UpdateTaskSheet;

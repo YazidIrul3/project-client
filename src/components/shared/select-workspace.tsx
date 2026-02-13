@@ -18,7 +18,7 @@ export const SelectWorkspace = (props: SelectWorkspaceProps) => {
   const { workspaceId } = useCurrentWorkspace();
 
   return (
-    <Select defaultValue={workspaceId} onValueChange={props.onChange}>
+    <Select disabled defaultValue={workspaceId} onValueChange={props.onChange}>
       <SelectTrigger className=" min-w-full">
         <SelectValue placeholder="Select a workspace" />
       </SelectTrigger>

@@ -56,7 +56,14 @@ export const TodoSection = () => {
         <main className=" mt-3">
           <div className="flex flex-row gap-3 overflow-x-auto w-full scrollbar-hide  p-4">
             {SelectInputData.status.map((status, i: number) => {
-              return <TodoKanbanCard key={i} name={status.toLowerCase()} />;
+              return (
+                <TodoKanbanCard
+                  key={i}
+                  name={status.toLowerCase()}
+                  workspacesData={workspacesByUserIdData?.data}
+                  projectsData={projectsByWorkspaceIdData?.data}
+                />
+              );
             })}
           </div>
         </main>
