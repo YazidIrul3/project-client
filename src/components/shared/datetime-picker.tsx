@@ -9,10 +9,11 @@ import { Input } from "../ui/input";
 type DateTimePickerProps = {
   name: string;
   onChange?: (date: unknown) => void;
+  date?: Date;
 };
 
 export const DateTimePicker = (props: DateTimePickerProps) => {
-  const [date, setDate] = useState<Date>();
+  const [date, setDate] = useState<Date>(props.date as Date);
 
   return (
     <Popover>
@@ -61,7 +62,7 @@ export const DateTimePicker = (props: DateTimePickerProps) => {
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
-        <Calendar mode="single" selected={date} onSelect={setDate} />
+        <Calendar required mode="single" selected={date} onSelect={setDate} />
       </PopoverContent>
     </Popover>
   );

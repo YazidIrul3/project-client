@@ -5,12 +5,20 @@ import { useLoading } from "@/hooks/use-loading";
 import { TaskEntity } from "@/types/api/task";
 import { useEffect } from "react";
 import { TaskCard } from "./task-card";
+import { WorkspaceEntity } from "@/types/api/workspace";
+import { ProjectEntity } from "@/types/api/project";
 
 type TodoKanbanCard = {
   name: string;
+  workspacesData: WorkspaceEntity[];
+  projectsData: ProjectEntity[];
 };
 
-const TodoKanbanCard = ({ name }: TodoKanbanCard) => {
+const TodoKanbanCard = ({
+  name,
+  workspacesData,
+  projectsData,
+}: TodoKanbanCard) => {
   const { token, user } = useAuthenticated();
   const { setIsLoading } = useLoading();
   const {
@@ -27,7 +35,6 @@ const TodoKanbanCard = ({ name }: TodoKanbanCard) => {
     setIsLoading(false);
   }, [tasksByUserIdAndTaskNameIsLoading]);
 
-  console.log(tasksByUserIdAndTaskNameData?.data);
   return (
     <Card className=" min-w-[250px] min-h-[400px] p-3">
       <div className=" flex flex-row items-center justify-between px-2">
@@ -54,7 +61,12 @@ const TodoKanbanCard = ({ name }: TodoKanbanCard) => {
         {tasksByUserIdAndTaskNameData?.data?.map(
           (item: TaskEntity, i: number) => {
             return (
-              <TaskCard key={i} taskData={item} />
+              <TaskCard
+                key={i}
+                taskData={item}
+                workspacesData={workspacesData}
+                projectsData={projectsData}
+              />
               // <div
               //   key={i}
               //   className=" text-slate-900 font-bold shadow-sm text-sm border  border-black rounded-lg p-3 min-w-full w-full min-h-[70px]"
