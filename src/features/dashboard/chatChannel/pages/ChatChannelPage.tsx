@@ -6,7 +6,6 @@ import { useParams } from "next/navigation";
 
 const ChatChannelPage = () => {
   const p = useParams();
-
   return (
     <DashboardLayout>
       <ChatChannelSection channelId={p?.id as string} />

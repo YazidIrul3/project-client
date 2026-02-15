@@ -52,15 +52,35 @@ import {
   ChatChannelMemberEntity,
 } from "@/types/api/chat-channel";
 import { useAuthenticated } from "@/hooks/use-authenticated";
+import { SelectAssigned } from "@/components/shared/select-assigned";
+import { useGetWorkspaceMembersByWorkspaceId } from "@/features/api/workspaceMember/get-workspaceMembersByWorkspaceId";
 
 const UpdateChatChanneleSheet = ({
   data: chatChannelData,
 }: {
   data: ChatChannelEntity;
 }) => {
-  const { data } = authClient.useSession();
-  const [checked, setChecked] = useState<boolean>(false);
+  const [checked, setChecked] = useState<boolean>(
+    chatChannelData.type == "private" ? true : false,
+  );
+  const { workspaceId } = useCurrentWorkspace();
   const { token, user } = useAuthenticated();
+  const [chatChannelMembers, setChatChannelMembers] = useState(
+    chatChannelData?.chatChannelMember?.map((item) => {
+      return {
+        name: item.member.name,
+        id: item.member.id,
+        email: item.member.email,
+      };
+    }),
+  );
+  const {
+    data: workspaceMembersByWorkspaceIdData,
+    isLoading: workspaceMembersByWorkspaceIdLoading,
+  } = useGetWorkspaceMembersByWorkspaceId({
+    token,
+    workspaceId,
+  });
 
   const { mutate: updateChatChannelMutation } = useUpdatChatChannel({
     id: chatChannelData.id,
@@ -83,7 +103,9 @@ const UpdateChatChanneleSheet = ({
       type: checked ? "private" : "general",
       chatChannelMembers: chatChannelData.chatChannelMember?.map((item) => {
         return {
-          memberId: item.member.id,
+          name: item.member.name,
+          id: item.member.id,
+          email: item.member.email,
         };
       }),
     },
@@ -91,18 +113,24 @@ const UpdateChatChanneleSheet = ({
   const { control, getValues } = form;
   const { open, openSheet, setOpen, closeSheet } = useSheet();
 
+  const handleAddChatChannelMembers = (members: {
+    id: string;
+    email: string;
+    name: string;
+  }) => {
+    setChatChannelMembers((prev) => {
+      return [...prev, members];
+    });
+  };
+
   const handleOnSubmit = () => {
     updateChatChannelMutation({
       name: getValues("name"),
       description: getValues("description"),
       type: checked ? "private" : "general",
-      chatChannelMembers: getValues("chatChannelMembers"),
+      chatChannelMembers: chatChannelMembers,
     });
   };
-
-  if (chatChannelData.type == "private") {
-    setChecked(true);
-  }
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -161,6 +189,26 @@ const UpdateChatChanneleSheet = ({
                     </FormItem>
                   )}
                 />
+
+                {checked && (
+                  <div>
+                    <div className=" flex flex-col gap-3">
+                      <FormLabel>Chat channel Members</FormLabel>
+                      <div className=" min-w-full w-full">
+                        <SelectAssigned
+                          assignedData={chatChannelMembers}
+                          handleOnClick={(member) =>
+                            handleAddChatChannelMembers(member)
+                          }
+                          workspaceMembersData={
+                            workspaceMembersByWorkspaceIdData?.data
+                          }
+                          name=""
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className=" flex flex-row items-center gap-2">
                   <div className=" flex flex-col gap-1">
