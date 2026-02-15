@@ -10,8 +10,10 @@ export const updatChatChannelSchema = z.object({
   type: z.string(),
   chatChannelMembers: z.array(
     z.object({
-      memberId: z.string(),
-    })
+      id: z.string(),
+      email: z.string(),
+      name: z.string(),
+    }),
   ),
 });
 
@@ -20,7 +22,7 @@ export type UpdatChatChannelSchema = z.infer<typeof updatChatChannelSchema>;
 export const updatChatChannel = async (
   data: UpdatChatChannelSchema,
   token: string,
-  id: string
+  id: string,
 ) => {
   const res = await axiosInstance.put(`/chat-channel/${id}`, data, {
     headers: {
@@ -56,7 +58,7 @@ export const useUpdatChatChannel = (params: UseUpdatChatChannelOptions) => {
         data,
         Variables,
         onMutateResult,
-        context
+        context,
       );
     },
   });

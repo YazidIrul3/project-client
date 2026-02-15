@@ -52,6 +52,7 @@ import CreateProjectSheet from "../project/_components/sheet/create-project-shee
 import { useLoading } from "@/hooks/use-loading";
 import { ProjectEntity } from "@/types/api/project";
 import { useAuthenticated } from "@/hooks/use-authenticated";
+import { useGetChatChannelByWorkspaceIdAndUserId } from "@/features/api/chatChannel/get-chatChannelByWorkspaceIdAndUserId";
 
 export const AppSidebarHeader = ({
   workspaceSidebarData,
@@ -70,6 +71,8 @@ export const AppSidebarHeader = ({
       token: token,
       userId: currentWorkspace.userId,
     });
+
+  console.log(currentWorkspace.userId);
 
   React.useEffect(() => {
     if (workspaceByUserLoading) setIsLoading(true);
@@ -257,7 +260,7 @@ export const AppSidebarContent = ({
           </div>
         </div>
 
-        <div className="">
+        <div className=" flex flex-col gap-2">
           {!open
             ? chatChannel?.map((item: ChatChannelEntity) => (
                 <Link
@@ -368,8 +371,11 @@ export const AppSidebarFooter = ({
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { workspace: currentWorkspace, setCurrentWorkspaceId } =
-    useCurrentWorkspace();
+  const {
+    workspace: currentWorkspace,
+    setCurrentWorkspaceId,
+    workspaceId,
+  } = useCurrentWorkspace();
   const { isLoading, setIsLoading } = useLoading();
   const { token, user } = useAuthenticated();
   const { data: workspaceSidebarData, isLoading: workspaceSidebarDataLoading } =
@@ -378,13 +384,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       userId: user.id,
       workspaceName: currentWorkspace.name,
     });
+  const {
+    data: chatChannelByWorkspaceIdAndUserIdData,
+    isLoading: chatChannelByWorkspaceIdAndUserIdIsLoading,
+  } = useGetChatChannelByWorkspaceIdAndUserId({
+    token,
+    workspaceId,
+    userId: user.id,
+  });
 
   React.useEffect(() => {
-    if (workspaceSidebarDataLoading) setIsLoading(true);
+    if (
+      workspaceSidebarDataLoading ||
+      chatChannelByWorkspaceIdAndUserIdIsLoading
+    )
+      setIsLoading(true);
 
     setCurrentWorkspaceId(workspaceSidebarData?.workspace?.id);
     setIsLoading(false);
-  }, [workspaceSidebarDataLoading]);
+  }, [workspaceSidebarDataLoading, chatChannelByWorkspaceIdAndUserIdIsLoading]);
 
   return (
     <div>
@@ -399,7 +417,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {/* sidebar content */}
           <AppSidebarContent
             projects={workspaceSidebarData?.workspace?.projects}
-            chatChannel={workspaceSidebarData?.workspace?.chatChannel}
+            chatChannel={chatChannelByWorkspaceIdAndUserIdData?.data}
           />
 
           <AppSidebarFooter workspaceSidebarData={workspaceSidebarData} />

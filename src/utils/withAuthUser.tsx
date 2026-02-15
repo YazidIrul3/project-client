@@ -25,13 +25,7 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
         token: data?.session?.token,
         mutationConfig: {
           onMutate() {
-            console.log("🔥 CREATE WORKSPACE MUTATE");
-          },
-          onSuccess(data, variables, onMutateResult, context) {
-            console.log(data);
-            console.log(variables);
-            console.log(onMutateResult);
-            console.log(context);
+            // console.log("🔥 CREATE WORKSPACE MUTATE");
           },
         },
       });
@@ -122,15 +116,13 @@ const withAuthUser = (OriginalComponent: ComponentType) => {
       );
 
       if (token && data) {
-        if (data.session.userId != currentWorkspace.userId) {
-          createWorkspace({
-            avatar: "tes",
-            name: workspaceName,
-            timezone: "tes",
-            userId: data.user.id,
-            workspaceTypeName: "personal",
-          });
-        }
+        createWorkspace({
+          avatar: "tes",
+          name: workspaceName,
+          timezone: "tes",
+          userId: data.user.id,
+          workspaceTypeName: "personal",
+        });
 
         setIsLoading(false);
 

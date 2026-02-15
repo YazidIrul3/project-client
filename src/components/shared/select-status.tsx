@@ -18,7 +18,7 @@ export const SelectStatus = (props: SelectStatusProps) => {
     <Select
       defaultValue={
         props.taskStatus
-          ? props.taskStatus
+          ? props.taskStatus.toLowerCase()
           : SelectInputData.status[0].toLowerCase()
       }
       onValueChange={props.onChange}
@@ -34,7 +34,7 @@ export const SelectStatus = (props: SelectStatusProps) => {
               <h1
                 className={`min-w-full capitalize w-full  text-slate-50 font-bold px-4 py-1 rounded-sm text-xs ${item.toLocaleLowerCase() == "backlog" ? "bg-gray-600" : item.toLocaleLowerCase() == "planning" ? "bg-yellow-500" : item.toLocaleLowerCase() == "todo" ? " bg-yellow-600" : "bg-green-600"}`}
               >
-                {item}
+                {item.toLowerCase()}
               </h1>
             </SelectItem>
           ))}

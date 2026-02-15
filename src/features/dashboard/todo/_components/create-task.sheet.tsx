@@ -39,6 +39,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useCurrentWorkspace } from "../../_hooks/use-current-workspace";
 import { useGetWorkspaceMembersByWorkspaceId } from "@/features/api/workspaceMember/get-workspaceMembersByWorkspaceId";
+import { Tomorrow } from "next/font/google";
+import { watch } from "fs";
 
 interface AssignedCreateUser {
   id: string;
@@ -65,13 +67,13 @@ const CreateTaskSheet = ({
       endDate: new Date(),
       startTime: "07:00",
       endTime: "07:00",
-      status: "backlog",
+      status: "todo",
       priority: "LOW",
       workspaceId,
     },
   });
   const { open, setOpen } = useSheet();
-  const { control, getValues, watch } = form;
+  const { control, getValues, setValue, watch } = form;
   const { data: workspaceMembersByWorkspaceIdData } =
     useGetWorkspaceMembersByWorkspaceId({
       token,
@@ -106,7 +108,7 @@ const CreateTaskSheet = ({
     createTaskMutation({
       description: getValues("description"),
       name: getValues("name"),
-      status: getValues("status"),
+      status: watch("status"),
       priority: getValues("priority"),
       projectId: getValues("projectId"),
       startDate: getValues("startDate"),
@@ -195,7 +197,11 @@ const CreateTaskSheet = ({
                         </FormLabel>
 
                         <FormControl className="  w-full">
-                          <SelectStatus {...field} onChange={field.onChange} />
+                          <SelectStatus
+                            {...field}
+                            taskStatus={watch("status")}
+                            onChange={field.onChange}
+                          />
                         </FormControl>
 
                         <FormMessage />
@@ -366,7 +372,11 @@ const CreateTaskSheet = ({
                     <FormDescription className=" text-xs">
                       Change to next status
                     </FormDescription>
-                    <Button className=" w-fit text-xs px-2 py-0 font-bold bg-purple-700">
+                    <Button
+                      onClick={() => setValue("status", "backlog")}
+                      type="button"
+                      className=" w-fit text-xs px-2 py-0 font-bold bg-purple-700"
+                    >
                       <ArrowRightCircle />
                       Move to Backlog
                     </Button>
@@ -377,7 +387,11 @@ const CreateTaskSheet = ({
                     <FormDescription className=" text-xs">
                       Set deadline today
                     </FormDescription>
-                    <Button className=" w-fit text-xs px-2 py-0  font-bold bg-sky-700">
+                    <Button
+                      onClick={() => setValue("endDate", new Date())}
+                      type="button"
+                      className=" w-fit text-xs px-2 py-0  font-bold bg-sky-700"
+                    >
                       <Calendar />
                       Change to Today
                     </Button>
@@ -388,7 +402,17 @@ const CreateTaskSheet = ({
                     <FormDescription className=" text-xs">
                       Set deadline tomorrow
                     </FormDescription>
-                    <Button className=" w-fit text-xs px-2 py-0  font-bold bg-amber-700">
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        const tommorrow = new Date(new Date())
+                          .setDate(new Date().getDate() + 1)
+                          .toString();
+
+                        setValue("endDate", new Date(tommorrow));
+                      }}
+                      className=" w-fit text-xs px-2 py-0  font-bold bg-amber-700"
+                    >
                       <Clock />
                       Set Tomorrow
                     </Button>
